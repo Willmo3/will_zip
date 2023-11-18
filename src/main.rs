@@ -1,13 +1,14 @@
 use std::env;
-use std::io;
 use std::process;
 use std::fs;
 
-fn main() -> io::Result<()> {
-    let filename: String = match get_filename() {
-        Ok(name) => name,
-        Err(message) => {
-            println!("{}", message);
+fn main() {
+    // For now, only checking that there is a second arg.
+    // Not complaining if they pass too few.
+    let filename: String = match env::args().skip(1).next() {
+        Some(name) => name,
+        None => {
+            println!("File name not specified! Usage: wz [filename]");
             process::exit(1)
         },
     };
@@ -21,13 +22,4 @@ fn main() -> io::Result<()> {
     };
 
     println!("{:?}", bytes);
-    // Read in file
-    Ok(())
-}
-
-fn get_filename() -> Result<String, &'static str> {
-    match env::args().skip(1).next() {
-        None => Err("File name not specified! Usage: wz [filename]"),
-        Some(filename) => Ok(filename),
-    }
 }
