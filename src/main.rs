@@ -23,5 +23,5 @@ fn main() {
         },
     };
 
-    zip::gen_frequency(&bytes);
+    freq::gen_frequency(&bytes);
 }
