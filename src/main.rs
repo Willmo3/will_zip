@@ -13,7 +13,7 @@ fn main() {
         },
     };
 
-    let bytes :Vec<u8> = match fs::read(&filename) {
+    let bytes: Vec<u8> = match fs::read(&filename) {
         Ok(bytes) => bytes,
         Err(_) => {
             println!("File not found: {}", &filename);
