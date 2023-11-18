@@ -12,7 +12,14 @@ fn main() -> io::Result<()> {
         },
     };
 
-    let bytes :Vec<u8> = fs::read(filename)?;
+    let bytes :Vec<u8> = match fs::read(&filename) {
+        Ok(bytes) => bytes,
+        Err(_) => {
+            println!("File not found: {}", &filename);
+            process::exit(1)
+        },
+    };
+
     println!("{:?}", bytes);
     // Read in file
     Ok(())
