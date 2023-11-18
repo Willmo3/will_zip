@@ -2,6 +2,8 @@ use std::env;
 use std::process;
 use std::fs;
 
+mod zip;
+
 fn main() {
     // For now, only checking that there is a second arg.
     // Not complaining if they pass too few.
@@ -21,5 +23,5 @@ fn main() {
         },
     };
 
-    println!("{:?}", bytes);
+    zip::gen_frequency(&bytes);
 }
