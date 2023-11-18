@@ -2,7 +2,7 @@ use std::env;
 use std::process;
 use std::fs;
 
-mod zip;
+mod freq;
 
 fn main() {
     // For now, only checking that there is a second arg.
