@@ -9,10 +9,11 @@ pub struct Node {
 }
 
 // Ordered nature of node is key of binary heap.
+// Explicit implementation needed to handle ties.
 impl Ord for Node {
     fn cmp(&self, other: &Self) -> Ordering {
         // Ties must be broken or decompression is nondeterministic!
-        other.count.cmp(&self.count)
+        &self.count.cmp(other.count)
             .then_with(|| self.value.cmp(&other.value))    
     }
 }
