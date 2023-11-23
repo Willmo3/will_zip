@@ -1,7 +1,7 @@
 // A single node, capable of being filtered into a heap.
 // Author: Will Morris.
 
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct Node {
     value: u8,
     count: usize,
