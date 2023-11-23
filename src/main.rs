@@ -4,6 +4,7 @@ use std::fs;
 
 mod freq;
 mod node;
+mod encoding;
 
 fn main() {
     // For now, only checking that there is a second arg.
@@ -24,5 +25,7 @@ fn main() {
         },
     };
 
-    freq::gen_frequency(&bytes);
+    let freq = freq::gen_frequency(&bytes);
+    let heap = encoding::gen_encoding(&freq);
+    println!("{:?}", heap);
 }
