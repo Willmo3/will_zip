@@ -3,12 +3,12 @@
 
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct Node {
-    count: usize,
     value: u8,
+    count: usize,
 }
 
 impl Node {
-    fn new(count: usize, value: u8) -> Self {
+    pub fn new(value: u8, count: usize) -> Node {
         Self { count: count, value: value }
     }
 }
