@@ -5,18 +5,18 @@ use std::cmp::Ordering;
 // A node in this context is a data tuple.
 #[derive(PartialEq, Eq, Debug)]
 pub struct Node {
-    value: u8,
+    byte: u8,
     count: usize,
 }
 
 impl Node {
-    pub fn new(value: u8, count: usize) -> Node {
-        Self { count: count, value: value }
+    pub fn new(byte: u8, count: usize) -> Node {
+        Self { byte: byte, count: count }
     }
 
     // Value accessor needed for sorting normalization
-    pub fn value(&self) -> u8 {
-        self.value.clone()
+    pub fn byte(&self) -> u8 {
+        self.byte.clone()
     }
 }
 
@@ -25,7 +25,7 @@ impl Node {
 impl Ord for Node {
     fn cmp(&self, other: &Self) -> Ordering {
         self.count.cmp(&other.count)
-            .then_with(|| self.value.cmp(&other.value))
+            .then_with(|| self.byte.cmp(&other.byte))
     }
 }
 
