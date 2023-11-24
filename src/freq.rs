@@ -26,7 +26,7 @@ pub fn normalize(original: &HashMap::<u8, usize>) -> HashMap<u8, u8> {
 
    let mut retmap: HashMap::<u8, u8> = HashMap::new();
    for i in 0..storage_vec.len() {
-       retmap.insert(storage_vec[i].byte(), i as u8);
+       retmap.insert(storage_vec[i].byte, i as u8);
    }
    retmap
 }
@@ -44,11 +44,6 @@ pub struct FreqCount {
 impl FreqCount {
     pub fn new(byte: u8, count: usize) -> FreqCount {
         Self { byte: byte, count: count }
-    }
-
-    // Value accessor needed for sorting normalization
-    pub fn byte(&self) -> u8 {
-        self.byte.clone()
     }
 }
 
