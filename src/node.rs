@@ -2,6 +2,7 @@
 // Author: Will Morris.
 use std::cmp::Ordering;
 
+// A node in this context is a data tuple.
 #[derive(PartialEq, Eq, Debug)]
 pub struct Node {
     value: u8,
@@ -11,6 +12,11 @@ pub struct Node {
 impl Node {
     pub fn new(value: u8, count: usize) -> Node {
         Self { count: count, value: value }
+    }
+
+    // Value accessor needed for sorting normalization
+    pub fn value(&self) -> u8 {
+        self.value.clone()
     }
 }
 
