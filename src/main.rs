@@ -26,6 +26,6 @@ fn main() {
     };
 
     let freq = freq::gen_frequency(&bytes);
-    let heap = encoding::gen_encoding(&freq);
-    println!("{:?}", heap);
+    println!("{:?}", encoding::gen_encoding(&freq));
+    println!("{:?}", freq::normalize(&freq));
 }
