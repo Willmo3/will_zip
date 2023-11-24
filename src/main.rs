@@ -4,6 +4,7 @@ use std::fs;
 
 mod freq;
 mod encoding;
+mod node;
 
 fn main() {
     // For now, only checking that there is a second arg.
