@@ -2,12 +2,12 @@ use std::collections::HashMap;
 use std::cmp::Ordering;
 
 // Create a hashmap of frequencies in a byte map.
-pub fn gen_frequency(bytes: &Vec<u8>) -> HashMap::<u8, usize> {
+pub fn gen_frequency(bytes: &[u8]) -> HashMap::<u8, usize> {
     bytes.iter().fold(HashMap::<u8, usize>::new(), | mut map, curr | {
         if !map.contains_key(curr) {
-            map.insert(curr.clone(), 0);
+            map.insert(*curr, 0);
         }
-        map.insert(curr.clone(), map.get(curr).unwrap() + 1);
+        map.insert(*curr, map.get(curr).unwrap() + 1);
         map
     })
 }
@@ -18,7 +18,7 @@ pub fn gen_frequency(bytes: &Vec<u8>) -> HashMap::<u8, usize> {
 // The fundamental objective of this program is to minimize storage size.
 pub fn normalize(original: &HashMap::<u8, usize>) -> HashMap<u8, u8> {
    let mut storage_vec = original.iter().fold(Vec::new(), | mut vec, (byte, count) | {
-       vec.push(FreqCount::new(byte.clone(), count.clone()));
+       vec.push(FreqCount::new(*byte, *count));
        vec
    });
 
@@ -43,7 +43,7 @@ pub struct FreqCount {
 
 impl FreqCount {
     pub fn new(byte: u8, count: usize) -> FreqCount {
-        Self { byte: byte, count: count }
+        Self { byte, count: count }
     }
 }
 
