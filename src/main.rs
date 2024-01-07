@@ -2,9 +2,12 @@ use std::env;
 use std::process;
 use std::fs;
 
-mod freq;
+mod tree {
+    pub mod node;
+}
+
 mod encoding;
-mod node;
+mod freq;
 
 fn main() {
     // For now, only checking that there is a second arg.
