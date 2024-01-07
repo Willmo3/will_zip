@@ -43,7 +43,10 @@ pub struct FreqCount {
 
 impl FreqCount {
     pub fn new(byte: u8, count: usize) -> FreqCount {
-        Self { byte: byte, count: count }
+        Self { byte, count }
+    }
+    pub fn count(&self) -> usize {
+        self.count
     }
 }
 
