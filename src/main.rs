@@ -4,6 +4,7 @@ use std::fs;
 
 mod tree {
     pub mod node;
+    pub mod huffman;
 }
 
 mod encoding;
