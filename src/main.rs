@@ -2,7 +2,6 @@ use std::env;
 use std::process;
 use std::fs;
 use crate::tree::huffman::prepare_huffman;
-use crate::tree::node::Node;
 
 mod tree {
     pub mod node;
@@ -35,6 +34,6 @@ fn main() {
     let heap = prepare_huffman(&freq);
     match heap {
         None => { println!("") }
-        Some(heap) => { println!("{:?}", heap)}
+        Some(heap) => { println!("{}", heap)}
     }
 }

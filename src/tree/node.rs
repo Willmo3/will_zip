@@ -1,5 +1,6 @@
 use crate::freq;
 use std::cmp::Ordering;
+use std::fmt::{Display, Formatter};
 
 // Author: Willmo3
 // A node represents either an internal node, with a left and right child,
@@ -11,7 +12,6 @@ use std::cmp::Ordering;
 // Representing their relative frequencies.
 // If they are not normalized, and simply treated as a mapping from value -> frequency,
 // their values may overflow and there may be ties!
-#[derive(Debug)]
 pub enum Node {
     Internal { left: Box<Node>, right: Box<Node> },
     Leaf { contents: freq::FreqCount },
@@ -42,10 +42,32 @@ impl PartialEq for Node {
     }
 }
 
+impl Display for Node {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Node::Internal { left, right } => {
+                let left = left.fmt(f);
+                let right = right.fmt(f);
+                if left.is_err() {
+                    left
+                } else if right.is_err() {
+                    right
+                } else {
+                    Ok(())
+                }
+            }
+            Node::Leaf { contents } => {
+                f.write_fmt(format_args!("{}: {} ", contents.byte(), contents.count()))
+            }
+        }
+    }
+}
+
 impl Eq for Node {}
 
 impl Ord for Node {
     fn cmp(&self, other: &Self) -> Ordering {
+        // TODO: fix nondeterminism
         self.sum().cmp(&other.sum())
     }
 }
