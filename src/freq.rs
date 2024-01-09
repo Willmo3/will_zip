@@ -45,6 +45,11 @@ impl FreqCount {
     pub fn new(byte: u8, count: usize) -> FreqCount {
         Self { byte, count }
     }
+
+    pub fn byte(&self) -> u8 {
+        self.byte
+    }
+
     pub fn count(&self) -> usize {
         self.count
     }
