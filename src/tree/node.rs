@@ -11,18 +11,22 @@ use std::cmp::Ordering;
 // Representing their relative frequencies.
 // If they are not normalized, and simply treated as a mapping from value -> frequency,
 // their values may overflow and there may be ties!
+#[derive(Debug)]
 pub enum Node {
     Internal { left: Box<Node>, right: Box<Node> },
     Leaf { contents: freq::FreqCount },
 }
 
+/// CONSTRUCTORS
+pub fn leaf(contents: freq::FreqCount) -> Node {
+    Node::Leaf { contents }
+}
+pub fn internal(left: Box<Node>, right: Box<Node>) -> Node {
+    Node::Internal { left, right }
+}
+
+/// INSTANCE METHODS
 impl Node {
-    fn leaf(contents: freq::FreqCount) -> Self {
-        Node::Leaf { contents }
-    }
-    fn internal(left: Box<Node>, right: Box<Node>) -> Self {
-        Node::Internal { left, right }
-    }
     // Return the sum of this node's counts.
     fn sum(&self) -> usize {
         match self {
