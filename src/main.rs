@@ -8,7 +8,6 @@ mod tree {
     pub mod huffman;
 }
 
-mod encoding;
 mod freq;
 
 fn main() {
