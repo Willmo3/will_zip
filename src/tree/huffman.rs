@@ -1,5 +1,5 @@
 use std::collections::{BinaryHeap, HashMap};
-use crate::freq::FreqCount;
+use crate::ordering::ordering::ByteOrdering;
 use crate::tree::node::{internal, leaf, Node};
 
 /// Prepare a Huffman tree from a given frequency map.
@@ -12,7 +12,7 @@ pub fn prepare_huffman(frequency: &HashMap::<u8, u8>) -> Option<Node> {
     let mut heap = frequency.iter().fold(
             BinaryHeap::new(), | mut heap, (byte, count) | {
 
-        let freq = FreqCount::new(*byte, *count as usize);
+        let freq = ByteOrdering::new(*byte, *count as usize);
         heap.push(leaf(freq));
         heap
     });

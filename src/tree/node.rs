@@ -1,6 +1,6 @@
-use crate::freq;
 use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
+use crate::ordering::ordering::ByteOrdering;
 use crate::tree::node::Node::{Internal, Leaf};
 
 // Author: Will Morris
@@ -15,11 +15,11 @@ use crate::tree::node::Node::{Internal, Leaf};
 // their values may overflow and there may be ties!
 pub enum Node {
     Internal { left: Box<Node>, right: Box<Node> },
-    Leaf { contents: freq::FreqCount },
+    Leaf { contents: ByteOrdering },
 }
 
 /// CONSTRUCTORS
-pub fn leaf(contents: freq::FreqCount) -> Node {
+pub fn leaf(contents: ByteOrdering) -> Node {
     Leaf { contents }
 }
 pub fn internal(left: Box<Node>, right: Box<Node>) -> Node {
@@ -32,7 +32,7 @@ impl Node {
     fn sum(&self) -> usize {
         match self {
             Internal { left, right } =>  { left.sum() + right.sum() }
-            Leaf { contents } => contents.count()
+            Leaf { contents } => contents.precedence()
         }
     }
 
@@ -73,7 +73,7 @@ impl Display for Node {
                 }
             }
             Leaf { contents } => {
-                f.write_fmt(format_args!("{}: {} ", contents.byte(), contents.count()))
+                f.write_fmt(format_args!("{}: {} ", contents.byte(), contents.precedence()))
             }
         }
     }

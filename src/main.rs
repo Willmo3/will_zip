@@ -11,6 +11,7 @@ mod tree {
 
 mod ordering {
     pub mod freq;
+    pub mod ordering;
 }
 
 fn main() {
