@@ -15,6 +15,7 @@ pub fn gen_frequency(bytes: &[u8]) -> HashMap::<u8, usize> {
 // Given a map of frequencies, "normalize" them so that they are ordered 0-255.
 // Note that this WILL work, as there are only 255 u8 values.
 // The reason we're doing this is that storing a hashmap of u8-u8 is smaller.
+// If we do this, we can reliably guarantee that each encoding is a single byte pair.
 // The fundamental objective of this program is to minimize storage size.
 pub fn normalize(original: &HashMap::<u8, usize>) -> HashMap<u8, u8> {
    let mut storage_vec = original.iter().fold(Vec::new(), | mut vec, (byte, count) | {

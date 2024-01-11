@@ -5,13 +5,14 @@ use tree::node;
 /// Prepare a Huffman tree from a given frequency map.
 /// Return the root of the tree if any items or present,
 /// Or nothing otherwise.
-pub fn prepare_huffman(frequency: &HashMap::<u8, usize>) -> Option<node::Node> {
+/// NOTE that this expects a normalized frequency -- so will only take in u8!
+pub fn prepare_huffman(frequency: &HashMap::<u8, u8>) -> Option<node::Node> {
     // Prepare base heap with all elements sorted by frequency.
     // These are all the leaf nodes.
     let mut heap = frequency.iter().fold(
             BinaryHeap::new(), | mut heap, (byte, count) | {
 
-        let freq = freq::FreqCount::new(*byte, *count);
+        let freq = freq::FreqCount::new(*byte, *count as usize);
         heap.push(node::leaf(freq));
         heap
     });

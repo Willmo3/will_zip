@@ -30,6 +30,7 @@ fn main() {
     };
 
     let freq = freq::gen_frequency(&bytes);
+    let freq = freq::normalize(&freq);
     let heap = prepare_huffman(&freq);
 
     // Create an empty file, do not do any additional work.
