@@ -1,6 +1,7 @@
 use std::env;
 use std::process;
 use std::fs;
+use crate::freq::{gen_frequency, normalize};
 use crate::tree::huffman::prepare_huffman;
 
 mod tree {
@@ -12,7 +13,7 @@ mod freq;
 
 fn main() {
     // For now, only checking that there is a second arg.
-    // Not complaining if they pass too few.
+    // Not complaining if they pass too many.
     let filename: String = match env::args().skip(1).next() {
         Some(name) => name,
         None => {
@@ -29,8 +30,8 @@ fn main() {
         },
     };
 
-    let freq = freq::gen_frequency(&bytes);
-    let freq = freq::normalize(&freq);
+    let freq = gen_frequency(&bytes);
+    let freq = normalize(&freq);
     let heap = prepare_huffman(&freq);
 
     // Create an empty file, do not do any additional work.
