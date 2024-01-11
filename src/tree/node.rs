@@ -71,8 +71,6 @@ impl Ord for Node {
         if self.sum() == other.sum() {
             panic!("Unnormalized data!")
         }
-
-        // min byte used to ensure that ties are broken consistently.
         self.sum().cmp(&other.sum())
     }
 }
