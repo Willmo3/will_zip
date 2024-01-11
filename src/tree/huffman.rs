@@ -6,10 +6,10 @@ use crate::tree::node::{internal, leaf, Node};
 /// Return the root of the tree if any items or present,
 /// Or nothing otherwise.
 /// NOTE that this expects a normalized frequency -- so will only take in u8!
-pub fn prepare_huffman(frequency: &HashMap::<u8, u8>) -> Option<Node> {
+pub fn prepare_huffman(ordering: &HashMap::<u8, u8>) -> Option<Node> {
     // Prepare base heap with all elements sorted by frequency.
     // These are all the leaf nodes.
-    let mut heap = frequency.iter().fold(
+    let mut heap = ordering.iter().fold(
             BinaryHeap::new(), | mut heap, (byte, count) | {
 
         let freq = ByteOrdering::new(*byte, *count as usize);
