@@ -35,21 +35,6 @@ impl Node {
             Leaf { contents } => contents.precedence()
         }
     }
-
-    /// Return the minimum byte in this node.
-    /// This is used as a tiebreaker.
-    fn min_byte(&self) -> u8 {
-        match self {
-            Leaf { contents} => { contents.byte() }
-            Internal { left, right} => {
-                if left.min_byte() < right.min_byte() {
-                    left.min_byte()
-                } else {
-                    right.min_byte()
-                }
-            }
-        }
-    }
 }
 
 impl PartialEq for Node {
@@ -83,9 +68,12 @@ impl Eq for Node {}
 
 impl Ord for Node {
     fn cmp(&self, other: &Self) -> Ordering {
+        if self.sum() == other.sum() {
+            panic!("Unnormalized data!")
+        }
+
         // min byte used to ensure that ties are broken consistently.
         self.sum().cmp(&other.sum())
-            .then_with(|| self.min_byte().cmp(&other.min_byte()))
     }
 }
 
