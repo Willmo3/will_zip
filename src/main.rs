@@ -1,7 +1,7 @@
 use std::env;
 use std::process;
 use std::fs;
-use crate::freq::{gen_frequency, normalize};
+use crate::ordering::freq::{gen_frequency, normalize};
 use crate::tree::huffman::prepare_huffman;
 
 mod tree {
@@ -9,7 +9,9 @@ mod tree {
     pub mod huffman;
 }
 
-mod freq;
+mod ordering {
+    pub mod freq;
+}
 
 fn main() {
     // For now, only checking that there is a second arg.
