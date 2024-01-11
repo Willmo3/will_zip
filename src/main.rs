@@ -32,8 +32,13 @@ fn main() {
 
     let freq = freq::gen_frequency(&bytes);
     let heap = prepare_huffman(&freq);
-    match heap {
-        None => { println!() }
-        Some(heap) => { println!("{}", heap)}
+
+    // Create an empty file, do not do any additional work.
+    // This allows future encoding to rely on no "nones" being present.
+    if heap.is_none() {
+        return;
     }
+
+    let heap = heap.unwrap();
+    println!("{}", heap);
 }
