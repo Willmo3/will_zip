@@ -1,6 +1,7 @@
 use crate::freq;
 use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
+use crate::tree::node::Node::{Internal, Leaf};
 
 // Author: Willmo3
 // A node represents either an internal node, with a left and right child,
@@ -30,8 +31,8 @@ impl Node {
     /// Return the sum of this node's counts.
     fn sum(&self) -> usize {
         match self {
-            Node::Internal { left, right } =>  { left.sum() + right.sum() }
-            Node::Leaf { contents } => contents.count()
+            Internal { left, right } =>  { left.sum() + right.sum() }
+            Leaf { contents } => contents.count()
         }
     }
 
@@ -39,8 +40,8 @@ impl Node {
     /// This is used as a tiebreaker.
     fn min_byte(&self) -> u8 {
         match self {
-            Node::Leaf { contents} => { contents.byte() }
-            Node::Internal { left, right} => {
+            Leaf { contents} => { contents.byte() }
+            Internal { left, right} => {
                 if left.min_byte() < right.min_byte() {
                     left.min_byte()
                 } else {
@@ -60,7 +61,7 @@ impl PartialEq for Node {
 impl Display for Node {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Node::Internal { left, right } => {
+            Internal { left, right } => {
                 let left = left.fmt(f);
                 let right = right.fmt(f);
                 if left.is_err() {
@@ -71,7 +72,7 @@ impl Display for Node {
                     Ok(())
                 }
             }
-            Node::Leaf { contents } => {
+            Leaf { contents } => {
                 f.write_fmt(format_args!("{}: {} ", contents.byte(), contents.count()))
             }
         }
