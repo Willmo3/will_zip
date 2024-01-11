@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 use crate::tree::node::Node::{Internal, Leaf};
 
-// Author: Willmo3
+// Author: Will Morris
 // A node represents either an internal node, with a left and right child,
 // Or a leaf node, with a byte:contents frequency.
 // To get the value of a node, descend left and right.
@@ -20,10 +20,10 @@ pub enum Node {
 
 /// CONSTRUCTORS
 pub fn leaf(contents: freq::FreqCount) -> Node {
-    Node::Leaf { contents }
+    Leaf { contents }
 }
 pub fn internal(left: Box<Node>, right: Box<Node>) -> Node {
-    Node::Internal { left, right }
+    Internal { left, right }
 }
 
 /// INSTANCE METHODS
