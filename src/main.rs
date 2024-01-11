@@ -33,7 +33,7 @@ fn main() {
     let freq = freq::gen_frequency(&bytes);
     let heap = prepare_huffman(&freq);
     match heap {
-        None => { println!("") }
+        None => { println!() }
         Some(heap) => { println!("{}", heap)}
     }
 }
