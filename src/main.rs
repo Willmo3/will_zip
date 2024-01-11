@@ -1,7 +1,7 @@
 use std::env;
 use std::process;
 use std::fs;
-use crate::ordering::freq::{gen_frequency, normalize};
+use crate::ordering::freq::gen_ordering;
 use crate::tree::huffman::prepare_huffman;
 
 mod tree {
@@ -33,9 +33,8 @@ fn main() {
         },
     };
 
-    let freq = gen_frequency(&bytes);
-    let freq = normalize(&freq);
-    let heap = prepare_huffman(&freq);
+    let ordering = gen_ordering(&bytes);
+    let heap = prepare_huffman(&ordering);
 
     // Create an empty file, do not do any additional work.
     // This allows future encoding to rely on no "nones" being present.
