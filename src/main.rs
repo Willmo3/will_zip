@@ -17,7 +17,7 @@ mod ordering {
 fn main() {
     // For now, only checking that there is a second arg.
     // Not complaining if they pass too many.
-    let filename: String = match env::args().skip(1).next() {
+    let filename: String = match env::args().nth(1) {
         Some(name) => name,
         None => {
             println!("File name not specified! Usage: wz [filename]");
