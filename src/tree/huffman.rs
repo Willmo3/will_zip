@@ -1,5 +1,5 @@
 use std::collections::{BinaryHeap, HashMap};
-use crate::ordering::ordering::ByteOrdering;
+use crate::ordering::byteordering::ByteOrdering;
 use crate::tree::node::{internal, leaf, Node};
 
 /// Prepare a Huffman tree from a given frequency map.

@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use crate::ordering::ordering::ByteOrdering;
+use crate::ordering::byteordering::ByteOrdering;
 
 // Order the bytes in a stream based on how often they appear.
 // Needed for compression

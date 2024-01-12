@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
-use crate::ordering::ordering::ByteOrdering;
+use crate::ordering::byteordering::ByteOrdering;
 use crate::tree::node::Node::{Internal, Leaf};
 
 // Author: Will Morris
