@@ -14,6 +14,8 @@ mod ordering {
     pub mod byteordering;
 }
 
+mod bitsequence;
+
 fn main() {
     // For now, only checking that there is a second arg.
     // Not complaining if they pass too many.
