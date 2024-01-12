@@ -37,6 +37,8 @@ fn normalize(original: &HashMap::<u8, usize>) -> HashMap<u8, u8> {
    storage_vec.sort();
 
    let mut retmap: HashMap::<u8, u8> = HashMap::new();
+    
+   #[allow(clippy::needless_range_loop)]
    for i in 0..storage_vec.len() {
        retmap.insert(storage_vec[i].byte(), i as u8);
    }
