@@ -1,5 +1,6 @@
 // A BitSequence encapsulates a string of bits and methods for interacting with them.
 // Author: Will Morris
+// Big credit to Dr. Nathan Sprague for making a java version of this.
 struct BitSequence {
     // NOTE: in most cases, u64 will be equal to usize, so indexing with u64 will work.
     // The only time this wouldn't work is:
