@@ -21,6 +21,14 @@ impl BitSequence {
         }
     }
 
+    // Append all bits from iterator to the end of this BitSequence.
+    fn append_all(&mut self, iter: &mut BitIterator) {
+        let item = iter.next();
+        while item.is_some() {
+            self.append_bit(item.unwrap());
+        }
+    }
+
     // Append a single bit to the end of the sequence.
     fn append_bit(&mut self, bit: u8) {
         assert!(bit == 0 || bit == 1);
@@ -114,6 +122,11 @@ mod tests {
         for i in 0..64 {
             assert_eq!(iter.next().unwrap(), i % 2);
         }
+    }
+
+    #[test]
+    fn test_append_all() {
+        
     }
 }
 
