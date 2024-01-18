@@ -1,7 +1,8 @@
 // A BitSequence encapsulates a string of bits and methods for interacting with them.
 // Author: Will Morris
 // Big credit to Dr. Nathan Sprague for making a java version of this.
-struct BitSequence {
+#[derive(Clone)]
+pub struct BitSequence {
     // NOTE: in most cases, u64 will be equal to usize, so indexing with u64 will work.
     // The only time this wouldn't work is:
     // 1. you're on a 32 bit system
@@ -14,7 +15,7 @@ struct BitSequence {
 
 impl BitSequence {
     // Create a new, empty BitSequence.
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self {
             num_bits: 0,
             bytes: vec![],
@@ -27,7 +28,7 @@ impl BitSequence {
     }
 
     // Append a single bit to the end of the sequence.
-    fn append_bit(&mut self, bit: u8) {
+    pub fn append_bit(&mut self, bit: u8) {
         assert!(bit == 0 || bit == 1);
 
         let byte_index = self.num_bits / 8;

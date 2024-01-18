@@ -1,5 +1,7 @@
 use std::cmp::Ordering;
+use std::collections::{HashMap, HashSet};
 use std::fmt::{Display, Formatter};
+use crate::encoding::bitsequence::BitSequence;
 use crate::ordering::byteordering::ByteOrdering;
 use crate::tree::node::Node::{Internal, Leaf};
 
@@ -13,6 +15,7 @@ use crate::tree::node::Node::{Internal, Leaf};
 // Representing their relative frequencies.
 // If they are not normalized, and simply treated as a mapping from value -> frequency,
 // their values may overflow and there may be ties!
+#[derive(Hash)]
 pub enum Node {
     Internal { left: Box<Node>, right: Box<Node> },
     Leaf { contents: ByteOrdering },
@@ -33,6 +36,36 @@ impl Node {
         match self {
             Internal { left, right } =>  { left.sum() + right.sum() }
             Leaf { contents } => contents.precedence()
+        }
+    }
+
+    pub fn gen_encoding(&self) -> HashMap<u8, BitSequence> {
+        let mut encoding: HashMap<u8, BitSequence> = HashMap::new();
+        self.visit_node(&mut encoding, BitSequence::new());
+        encoding
+    }
+
+    // Generate paths to all root nodes.
+    // Note: this function takes ownership of the path BitSequence
+    // Because each path ought to have its own path.
+    fn visit_node(&self, encoding: &mut HashMap<u8, BitSequence>,
+        path: BitSequence) {
+
+        match self {
+            // If it is an internal node, descend left and right, makring this with 0 and 1.
+            Internal { left, right } => {
+                let mut left_path = path.clone();
+                left_path.append_bit(0);
+                let mut right_path = path.clone();
+                right_path.append_bit(1);
+
+                left.visit_node(encoding, left_path);
+                right.visit_node(encoding, right_path);
+            }
+            // If we've hit a leaf node, add the encoding to the bad boy!
+            Leaf { contents } => {
+                encoding.insert(contents.byte(), path.clone());
+            }
         }
     }
 }
