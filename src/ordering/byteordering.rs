@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 // Author: Will Morris.
 
 // A node in this context is a data tuple.
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Hash)]
 pub struct ByteOrdering {
     byte: u8,
     precedence: usize,
