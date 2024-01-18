@@ -52,7 +52,7 @@ impl Node {
         path: BitSequence) {
 
         match self {
-            // If it is an internal node, descend left and right, makring this with 0 and 1.
+            // If it is an internal node, descend left and right, making this with 0 and 1.
             Internal { left, right } => {
                 let mut left_path = path.clone();
                 left_path.append_bit(0);
