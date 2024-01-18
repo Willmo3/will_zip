@@ -14,7 +14,9 @@ mod ordering {
     pub mod byteordering;
 }
 
-mod bitsequence;
+mod encoding {
+    pub mod bitsequence;
+}
 
 fn main() {
     // For now, only checking that there is a second arg.
