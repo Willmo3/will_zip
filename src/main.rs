@@ -18,6 +18,10 @@ mod encoding {
     pub mod bitsequence;
 }
 
+mod file {
+    pub mod bytestream;
+}
+
 fn main() {
     // For now, only checking that there is a second arg.
     // Not complaining if they pass too many.
