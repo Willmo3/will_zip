@@ -3,7 +3,7 @@
 // Big credit to Dr. Nathan Sprague for making a java version of this.
 type Bit = u8;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub(crate) struct BitSequence {
     // NOTE: in most cases, u64 will be equal to usize, so indexing with u64 will work.
     // The only time this wouldn't work is:
@@ -22,6 +22,13 @@ impl BitSequence {
             num_bits: 0,
             bytes: vec![],
         }
+    }
+
+    // Crate a BitSequence from a string of bits.
+    pub(crate) fn from(bits: &[Bit]) -> Self {
+        let mut seq = Self::new();
+        seq.append_bits(bits);
+        seq
     }
 
     // Append a single bit to the end of the sequence.
@@ -44,7 +51,7 @@ impl BitSequence {
 
     // Append all bits from bit slice to self.
     // Useful for adding all bits while maintaining ownership.
-    fn append_bits(&mut self, bits: &[Bit]) {
+    pub(crate) fn append_bits(&mut self, bits: &[Bit]) {
         bits.iter().for_each(| bit | self.append_bit(*bit));
     }
 
