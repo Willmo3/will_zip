@@ -2,7 +2,7 @@ use std::env;
 use std::process;
 use std::fs;
 use crate::ordering::freq::gen_ordering;
-use crate::tree::huffman::prepare_huffman;
+use crate::tree::node::Node;
 
 // Given a file F, this program converts F into a HuffmanEncoding and saves a copy of it
 // Or given an already-encoded file F', this program converts it into a decoded file F.
@@ -10,7 +10,6 @@ use crate::tree::huffman::prepare_huffman;
 
 mod tree {
     pub mod node;
-    pub mod huffman;
 }
 
 // The core of the program revolves around ordering bytes by their precedence.
@@ -55,7 +54,7 @@ fn main() {
     };
 
     let ordering = gen_ordering(&bytes);
-    let heap = prepare_huffman(&ordering);
+    let heap = Node::huffman(&ordering);
 
     // Create an empty file, do not do any additional work.
     // This allows future encoding to rely on no "nones" being present.
