@@ -4,7 +4,7 @@
 type Bit = u8;
 
 #[derive(Clone)]
-pub struct BitSequence {
+pub(crate) struct BitSequence {
     // NOTE: in most cases, u64 will be equal to usize, so indexing with u64 will work.
     // The only time this wouldn't work is:
     // 1. you're on a 32 bit system
@@ -25,7 +25,7 @@ impl BitSequence {
     }
 
     // Append a single bit to the end of the sequence.
-    pub fn append_bit(&mut self, bit: Bit) {
+    pub(crate) fn append_bit(&mut self, bit: Bit) {
         assert!(bit == 0 || bit == 1);
 
         let byte_index = self.num_bits / 8;
@@ -44,7 +44,7 @@ impl BitSequence {
 
     // Append all bits from bit slice to self.
     // Useful for adding all bits while maintaining ownership.
-    pub fn append_bits(&mut self, bits: &[Bit]) {
+    fn append_bits(&mut self, bits: &[Bit]) {
         bits.iter().for_each(| bit | self.append_bit(*bit));
     }
 
