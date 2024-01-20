@@ -1,9 +1,11 @@
+use std::fmt::{Debug, Formatter};
+
 // A BitSequence encapsulates a string of bits and methods for interacting with them.
 // Author: Will Morris
 // Big credit to Dr. Nathan Sprague for making a java version of this.
 type Bit = u8;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub(crate) struct BitSequence {
     // NOTE: in most cases, u64 will be equal to usize, so indexing with u64 will work.
     // The only time this wouldn't work is:
@@ -87,6 +89,15 @@ impl BitSequence {
             bits.push(self.get_bit(i).unwrap());
         }
         bits
+    }
+}
+
+impl Debug for BitSequence {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        for bit in self.get_bits() {
+            f.write_fmt(format_args!("{}", bit));
+        }
+        Ok(())
     }
 }
 
