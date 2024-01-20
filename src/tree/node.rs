@@ -181,26 +181,32 @@ mod tests {
     // Test that the tree properly generates an encoding
     #[test]
     fn test_encoding() {
-        let phrase = String::from("easytestabcdefabc");
-
         /*
-           EXPECTED ENCODING:
-           a: 000
-           e: 001
-           b: 010
-           t: 011
+           STRING: 1111100022334
 
-           c: 100
-           f: 1010
-           g: 1011
-           d: 1100
-           y: 1101
-           s: 111
+           EXPECTED ENCODING:
+           1: 1
+           0: 00
+           3: 011
+           2: 0100
+           4: 0101
          */
 
-        let mut encoding: HashMap<u8, BitSequence> = HashMap::new();
+        let mut expected_encoding: HashMap<u8, BitSequence> = HashMap::new();
+        expected_encoding.insert(1, BitSequence::from(&[1]));
+        expected_encoding.insert(0, BitSequence::from(&[0, 0]));
+        expected_encoding.insert(3, BitSequence::from(&[0, 1, 1]));
+        expected_encoding.insert(2, BitSequence::from(&[0, 1, 0, 0]));
+        expected_encoding.insert(4, BitSequence::from(&[0, 1, 0, 1]));
 
-        let mut seq = BitSequence::from(&[0, 0, 0]);
-        encoding.insert("a".bytes().next().unwrap(), seq);
+        let mut ordering: HashMap<u8, u8> = HashMap::new();
+        ordering.insert(1, 4);
+        ordering.insert(0, 3);
+        ordering.insert(3, 2);
+        ordering.insert(2, 1);
+        ordering.insert(4, 0);
+
+        let actual_encoding = Node::huffman(&ordering).unwrap().gen_encoding();
+        assert_eq!(expected_encoding, actual_encoding);
     }
 }
