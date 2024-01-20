@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::collections::{HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::fmt::{Display, Formatter};
 use crate::encoding::bitsequence::BitSequence;
 use crate::ordering::byteordering::ByteOrdering;
@@ -31,6 +31,35 @@ pub fn internal(left: Box<Node>, right: Box<Node>) -> Node {
 
 /// INSTANCE METHODS
 impl Node {
+
+    /// Prepare a Huffman tree from a given frequency map.
+    /// Return the root of the tree if any items or present,
+    /// Or nothing otherwise.
+    /// NOTE that this expects a normalized frequency -- so will only take in u8!
+    pub fn huffman(ordering: &HashMap::<u8, u8>) -> Option<Node> {
+        // Prepare base heap with all elements sorted by frequency.
+        // These are all the leaf nodes.
+        let mut heap = ordering.iter().fold(
+            BinaryHeap::new(), | mut heap, (byte, count) | {
+
+                let freq = ByteOrdering::new(*byte, *count as usize);
+                heap.push(leaf(freq));
+                heap
+            });
+
+        // Now prepare internal nodes with children.
+        while heap.len() > 1 {
+            let left = heap.pop().unwrap();
+            let right = heap.pop().unwrap();
+            let highest = internal(Box::from(left), Box::from(right));
+            heap.push(highest);
+        }
+
+        // The last element in the heap is the root node!
+        // Note: if no frequencies supplied, this will be none.
+        heap.pop()
+    }
+
     /// Return the sum of this node's counts.
     fn sum(&self) -> usize {
         match self {
@@ -39,9 +68,19 @@ impl Node {
         }
     }
 
+    // Generate the BitSequence for the encoding of each byte.
     pub fn gen_encoding(&self) -> HashMap<u8, BitSequence> {
         let mut encoding: HashMap<u8, BitSequence> = HashMap::new();
-        self.visit_node(&mut encoding, BitSequence::new());
+        match self {
+            Internal { .. } => {
+                self.visit_node(&mut encoding, BitSequence::new());
+            }
+            // Edge case: only one node. Path hasn't been formed yet!
+            // In this case, encode as 0.
+            Leaf { contents } => {
+                encoding.insert(contents.byte(), BitSequence::from(&[0]));
+            }
+        }
         encoding
     }
 
@@ -111,5 +150,57 @@ impl Ord for Node {
 impl PartialOrd for Node {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+    use crate::encoding::bitsequence::BitSequence;
+    use crate::tree::node::Node;
+
+    // Test that the tree generates an encoding for a single charACTER.
+    #[test]
+    fn test_single_encoding() {
+        let byte = 1;
+        let mut freq: HashMap<u8, u8> = HashMap::new();
+        freq.insert(byte, 1);
+
+        /*
+           EXPECTED ENCODING:
+           1: 0
+         */
+
+        let mut expected_encoding: HashMap<u8, BitSequence> = HashMap::new();
+        expected_encoding.insert(byte, BitSequence::from(&[0]));
+        let actual_encoding: HashMap<u8, BitSequence> = Node::huffman(&freq).unwrap().gen_encoding();
+
+        assert_eq!(expected_encoding, actual_encoding);
+    }
+
+    // Test that the tree properly generates an encoding
+    #[test]
+    fn test_encoding() {
+        let phrase = String::from("easytestabcdefabc");
+
+        /*
+           EXPECTED ENCODING:
+           a: 000
+           e: 001
+           b: 010
+           t: 011
+
+           c: 100
+           f: 1010
+           g: 1011
+           d: 1100
+           y: 1101
+           s: 111
+         */
+
+        let mut encoding: HashMap<u8, BitSequence> = HashMap::new();
+
+        let mut seq = BitSequence::from(&[0, 0, 0]);
+        encoding.insert("a".bytes().next().unwrap(), seq);
     }
 }
