@@ -4,21 +4,34 @@ use std::fs;
 use crate::ordering::freq::gen_ordering;
 use crate::tree::huffman::prepare_huffman;
 
+// Given a file F, this program converts F into a HuffmanEncoding and saves a copy of it
+// Or given an already-encoded file F', this program converts it into a decoded file F.
+// Author: Will Morris
+
 mod tree {
     pub mod node;
     pub mod huffman;
 }
 
+// The core of the program revolves around ordering bytes by their precedence.
 mod ordering {
+    // Generates an ordering of bytes-frequency of appearance.
     pub mod freq;
+    // Abstract ordering of byte to precedence.
+    // Used by freq to order by frequency.
     pub mod byteordering;
 }
 
+// Encodings are used when serializing the file to save space.
 mod encoding {
+    // Represents a list of bits, compressed using bitwise ops into a vec<u8>
     pub mod bitsequence;
 }
 
+// Relevant to the actual act of saving the file.
 mod file {
+    // Anything which can be represented as a stream of bytes uses this trait.
+    // This allows for easier deserialization... given a byte array, an object will come out!
     pub mod bytestream;
 }
 
