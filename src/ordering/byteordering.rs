@@ -1,8 +1,8 @@
 use std::cmp::Ordering;
-// A single node, capable of being filtered into a heap.
-// Author: Will Morris.
 
-// A node in this context is a data tuple.
+// An ordering of a byte to its precedence.
+// This is useful for propagating into a heap later.
+// Author: Will Morris
 #[derive(PartialEq, Eq, Debug, Hash)]
 pub struct ByteOrdering {
     byte: u8,
