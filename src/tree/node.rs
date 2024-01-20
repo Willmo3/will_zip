@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::cmp::{min, Ordering};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::fmt::{Display, Formatter};
 use crate::encoding::bitsequence::BitSequence;
@@ -39,6 +39,10 @@ impl Node {
     pub fn huffman(ordering: &HashMap::<u8, u8>) -> Option<Node> {
         // Prepare base heap with all elements sorted by frequency.
         // These are all the leaf nodes.
+
+        // Note that the binary heap is a MAX HEAP, not a min heap.
+        // This means that the first items to be removed will be those with the highest precedence.
+        // Since precedence is given in reverse order of appearance, this is what we want!
         let mut heap = ordering.iter().fold(
             BinaryHeap::new(), | mut heap, (byte, count) | {
 
@@ -49,8 +53,11 @@ impl Node {
 
         // Now prepare internal nodes with children.
         while heap.len() > 1 {
+            // Greatest node is rightmost.
+            // Since highest precedence means lowest value, first left node is lowest.
             let left = heap.pop().unwrap();
             let right = heap.pop().unwrap();
+
             let highest = internal(Box::from(left), Box::from(right));
             heap.push(highest);
         }
@@ -65,6 +72,18 @@ impl Node {
         match self {
             Internal { left, right } =>  { left.sum() + right.sum() }
             Leaf { contents } => contents.precedence()
+        }
+    }
+
+    // For breaking ties in a node, we need the minimum byte.
+    fn min_byte(&self) -> u8 {
+        match self {
+            Internal { left, right } => {
+                min(left.min_byte(), right.min_byte())
+            }
+            Leaf { contents } => {
+                contents.byte()
+            }
         }
     }
 
@@ -181,6 +200,9 @@ mod tests {
     // Test that the tree properly generates an encoding
     #[test]
     fn test_encoding() {
+        // TODO: redo test.
+        // Need to account for relative ordering.
+        
         /*
            STRING: 1111100022334
 
@@ -200,11 +222,11 @@ mod tests {
         expected_encoding.insert(4, BitSequence::from(&[0, 1, 0, 1]));
 
         let mut ordering: HashMap<u8, u8> = HashMap::new();
-        ordering.insert(1, 4);
-        ordering.insert(0, 3);
+        ordering.insert(1, 0);
+        ordering.insert(0, 1);
         ordering.insert(3, 2);
-        ordering.insert(2, 1);
-        ordering.insert(4, 0);
+        ordering.insert(2, 3);
+        ordering.insert(4, 4);
 
         let actual_encoding = Node::huffman(&ordering).unwrap().gen_encoding();
         assert_eq!(expected_encoding, actual_encoding);
