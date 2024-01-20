@@ -1,6 +1,8 @@
 // A BitSequence encapsulates a string of bits and methods for interacting with them.
 // Author: Will Morris
 // Big credit to Dr. Nathan Sprague for making a java version of this.
+type Bit = u8;
+
 #[derive(Clone)]
 pub struct BitSequence {
     // NOTE: in most cases, u64 will be equal to usize, so indexing with u64 will work.
@@ -10,7 +12,7 @@ pub struct BitSequence {
     // (i.e. when compressing a very large file)
     // In this case, the overflow will cause a panic, avoiding undefined behavior.
     num_bits: u64,
-    bytes: Vec<u8>,
+    bytes: Vec<Bit>,
 }
 
 impl BitSequence {
@@ -22,13 +24,8 @@ impl BitSequence {
         }
     }
 
-    // Append all bits from iterator to the end of this BitSequence.
-    fn append_all(&mut self, iter: &mut BitIterator) {
-        iter.for_each(| bit | self.append_bit(bit));
-    }
-
     // Append a single bit to the end of the sequence.
-    pub fn append_bit(&mut self, bit: u8) {
+    pub fn append_bit(&mut self, bit: Bit) {
         assert!(bit == 0 || bit == 1);
 
         let byte_index = self.num_bits / 8;
@@ -45,8 +42,25 @@ impl BitSequence {
         self.num_bits += 1;
     }
 
+    // Append all bits from bit slice to self.
+    // Useful for adding all bits while maintaining ownership.
+    pub fn append_bits(&mut self, bits: &[Bit]) {
+        bits.iter().for_each(| bit | self.append_bit(*bit));
+    }
+
+    // Assimilate a BitSequence into this sequence.
+    // Useful for removing temporary BitSequences from the equation
+    // if you want to keep your BitSequence, use append_bits
+    fn append_seq(&mut self, seq: BitSequence) {
+        self.append_bits(&seq.get_bits());
+    }
+
+
+    // BIT ACCESSORS
+
+
     // Get the bit at index usize.
-    fn get_bit(&self, index: u64) -> Option<u8> {
+    fn get_bit(&self, index: u64) -> Option<Bit> {
         if index >= self.num_bits {
             return None;
         }
@@ -59,26 +73,13 @@ impl BitSequence {
         }
     }
 
-    // Get immutable iterator over this sequence.
-    fn iter(&self) -> BitIterator {
-        BitIterator { sequence: &self, index: 0 }
-    }
-}
-
-// Many operations will operate over entire sequences.
-// For this reason, a BitIterator is provided.
-struct BitIterator<'a> {
-    sequence: &'a BitSequence,
-    index: u64,
-}
-
-impl<'a> Iterator for BitIterator<'a> {
-    type Item = u8;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let retval = self.sequence.get_bit(self.index);
-        self.index += 1;
-        retval
+    // Get all bits in bit sequence.
+    fn get_bits(&self) -> Vec<u8> {
+        let mut bits: Vec<Bit> = vec![];
+        for i in 0..self.num_bits {
+            bits.push(self.get_bit(i).unwrap());
+        }
+        bits
     }
 }
 
@@ -110,20 +111,7 @@ mod tests {
     }
 
     #[test]
-    fn test_iter() {
-        let mut seq = BitSequence::new();
-        for i in 0..64 {
-            seq.append_bit(i % 2);
-        }
-
-        let mut iter = seq.iter();
-        for i in 0..64 {
-            assert_eq!(iter.next().unwrap(), i % 2);
-        }
-    }
-
-    #[test]
-    fn test_append_all() {
+    fn test_append_seq() {
         let mut seq1 = BitSequence::new();
         for i in 0..64 {
             seq1.append_bit(i % 2);
@@ -134,7 +122,7 @@ mod tests {
             seq2.append_bit((i + 1) % 2);
         }
 
-        seq1.append_all(&mut seq2.iter());
+        seq1.append_seq(seq2);
         assert_eq!(0, seq1.get_bit(127).unwrap());
     }
 }
