@@ -15,7 +15,7 @@ use crate::tree::node::Node::{Internal, Leaf};
 // Representing their relative frequencies.
 // If they are not normalized, and simply treated as a mapping from value -> frequency,
 // their values may overflow and there may be ties!
-#[derive(Hash)]
+#[derive(Hash, Eq, PartialEq)]
 pub enum Node {
     Internal { left: Box<Node>, right: Box<Node> },
     Leaf { contents: ByteFreq },
@@ -59,8 +59,11 @@ impl Node {
     }
 
 
+
+    // ****** NODE CONSTRUCTOR ****** //
+
     /// Prepare a Huffman tree from a given frequency map.
-    /// Return the root of the tree if any items or present,
+    /// Return the root of the tree if any items are present,
     /// Or nothing otherwise.
     pub fn huffman(ordering: &HashMap::<u8, usize>) -> Option<Node> {
         // Prepare base heap with all elements sorted by frequency.
@@ -90,6 +93,10 @@ impl Node {
         // Note: if no frequencies supplied, this will be none.
         heap.pop()
     }
+
+
+
+    // ****** ENCODING TRAVERSERS ****** //
 
     // Generate the BitSequence for the encoding of each byte.
     pub fn gen_encoding(&self) -> HashMap<u8, BitSequence> {
@@ -132,13 +139,6 @@ impl Node {
     }
 }
 
-impl PartialEq for Node {
-    fn eq(&self, other: &Self) -> bool {
-        self.freq() == other.freq()
-            && self.min_byte() == other.min_byte()
-    }
-}
-
 impl Display for Node {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -160,7 +160,8 @@ impl Display for Node {
     }
 }
 
-impl Eq for Node {}
+
+// ****** ORD IMPLEMENTATIONS ****** //
 
 impl Ord for Node {
     // NOTE: nodes are done with a MIN HEAP!
@@ -170,11 +171,16 @@ impl Ord for Node {
     }
 }
 
+// PartialOrd must be implemented or weird things will happen!
 impl PartialOrd for Node {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
+
+
+
+// ****** TESTS ****** //
 
 #[cfg(test)]
 mod tests {
