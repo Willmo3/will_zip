@@ -196,34 +196,32 @@ mod tests {
     }
 
     // Test that the tree properly generates an encoding
+    // NOTE: minor changes in tiebreaking should not ruin this test!
+    // Therefore, checking not exact encodings, but rather, encoding lengths.
     #[test]
     fn test_encoding() {
-        // TODO: redo test.
-        // Need to account for relative ordering.
+        let mut freq: HashMap<u8, usize> = HashMap::new();
+        freq.insert(1, 11);
+        freq.insert(0, 4);
+        freq.insert(2, 5);
+        freq.insert(3, 6);
+        freq.insert(4, 1);
+        freq.insert(6, 1);
+        freq.insert(7, 1);
+        freq.insert(5, 2);
+        freq.insert(8, 1);
+        freq.insert(9, 1);
+        let encoding = huffman(&freq).unwrap().gen_encoding();
 
-        /*
-           STRING: 1111100022334
-
-           EXPECTED ENCODING:
-           1: 1
-           0: 00
-           3: 011
-           2: 0100
-           4: 0101
-         */
-
-        let mut expected_encoding: HashMap<u8, BitSequence> = HashMap::new();
-        expected_encoding.insert(1, BitSequence::from(&[1]));
-        expected_encoding.insert(0, BitSequence::from(&[0, 0]));
-        expected_encoding.insert(3, BitSequence::from(&[0, 1, 1]));
-        expected_encoding.insert(2, BitSequence::from(&[0, 1, 0, 0]));
-        expected_encoding.insert(4, BitSequence::from(&[0, 1, 0, 1]));
-
-
-        let bytes: Vec<u8> = "11111111110000ASDABV2233433223123".bytes().collect();
-        let freq = gen_frequency(&bytes);
-
-        let actual_encoding = huffman(&freq).unwrap().gen_encoding();
-        assert_eq!(expected_encoding, actual_encoding);
+        assert_eq!(2, encoding.get(&1).unwrap().length());
+        assert_eq!(3, encoding.get(&0).unwrap().length());
+        assert_eq!(3, encoding.get(&2).unwrap().length());
+        assert_eq!(2, encoding.get(&3).unwrap().length());
+        assert_eq!(4, encoding.get(&5).unwrap().length());
+        assert_eq!(5, encoding.get(&4).unwrap().length());
+        assert_eq!(5, encoding.get(&8).unwrap().length());
+        assert_eq!(4, encoding.get(&9).unwrap().length());
+        assert_eq!(5, encoding.get(&7).unwrap().length());
+        assert_eq!(5, encoding.get(&6).unwrap().length());
     }
 }
