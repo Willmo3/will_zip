@@ -135,9 +135,14 @@ impl Display for Node {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Internal { left, right } => {
-                // For simplicity, ignoring errors. This is not prod critical.
-                left.fmt(f);
-                right.fmt(f);
+                let left = left.fmt(f);
+                if left.is_err() {
+                    return left
+                }
+                let right = right.fmt(f);
+                if right.is_err() {
+                    return right
+                }
                 Ok(())
             }
             Leaf { contents } => {
