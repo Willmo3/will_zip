@@ -43,18 +43,9 @@ impl Node {
         }
     }
 
-    // TIEBREAKERS
+    // TIEBREAKER
     // What if two nodes have the same frequency?
-    fn min_freq(&self) -> usize {
-        match self {
-            Internal { left, right, .. } => {
-                min(left.min_freq(), right.min_freq())
-            }
-            Leaf { contents } => {
-                contents.freq()
-            }
-        }
-    }
+    // Whichever node contains the minimum byte wins out!
     // For breaking ties in a node, we need the minimum byte.
     fn min_byte(&self) -> u8 {
         match self {
@@ -145,7 +136,6 @@ impl PartialEq for Node {
     fn eq(&self, other: &Self) -> bool {
         self.freq() == other.freq()
             && self.min_byte() == other.min_byte()
-            && self.min_freq() == other.min_freq()
     }
 }
 
@@ -176,7 +166,6 @@ impl Ord for Node {
     // NOTE: nodes are done with a MIN HEAP!
     fn cmp(&self, other: &Self) -> Ordering {
         other.freq().cmp(&self.freq())
-            .then_with(|| other.min_freq().cmp(&self.min_freq()))
             .then_with(|| other.min_byte().cmp(&self.min_byte()))
     }
 }
@@ -191,6 +180,7 @@ impl PartialOrd for Node {
 mod tests {
     use std::collections::HashMap;
     use crate::encoding::bitsequence::BitSequence;
+    use crate::ordering::freq::gen_frequency;
     use crate::tree::node::Node;
 
     // Test that the tree generates an encoding for a single charACTER.
@@ -236,14 +226,11 @@ mod tests {
         expected_encoding.insert(2, BitSequence::from(&[0, 1, 0, 0]));
         expected_encoding.insert(4, BitSequence::from(&[0, 1, 0, 1]));
 
-        let mut ordering: HashMap<u8, usize> = HashMap::new();
-        ordering.insert(1, 5);
-        ordering.insert(0, 3);
-        ordering.insert(3, 2);
-        ordering.insert(2, 2);
-        ordering.insert(4, 1);
 
-        let actual_encoding = Node::huffman(&ordering).unwrap().gen_encoding();
+        let bytes: Vec<u8> = "11111111110000ASDABV2233433223123".bytes().collect();
+        let mut freq = gen_frequency(&bytes);
+
+        let actual_encoding = Node::huffman(&freq).unwrap().gen_encoding();
         assert_eq!(expected_encoding, actual_encoding);
     }
 }
