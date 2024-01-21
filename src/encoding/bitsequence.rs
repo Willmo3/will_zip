@@ -17,6 +17,8 @@ pub(crate) struct BitSequence {
     bytes: Vec<Bit>,
 }
 
+
+// ****** CONSTRUCTORS ****** //
 impl BitSequence {
     // Create a new, empty BitSequence.
     pub(crate) fn new() -> Self {
@@ -32,7 +34,11 @@ impl BitSequence {
         seq.append_bits(bits);
         seq
     }
+}
 
+
+// ****** MUTATORS ****** ///
+impl BitSequence {
     // Append a single bit to the end of the sequence.
     pub(crate) fn append_bit(&mut self, bit: Bit) {
         assert!(bit == 0 || bit == 1);
@@ -54,7 +60,7 @@ impl BitSequence {
     // Append all bits from bit slice to self.
     // Useful for adding all bits while maintaining ownership.
     pub(crate) fn append_bits(&mut self, bits: &[Bit]) {
-        bits.iter().for_each(| bit | self.append_bit(*bit));
+        bits.iter().for_each(|bit| self.append_bit(*bit));
     }
 
     // Assimilate a BitSequence into this sequence.
@@ -63,11 +69,12 @@ impl BitSequence {
     fn append_seq(&mut self, seq: BitSequence) {
         self.append_bits(&seq.get_bits());
     }
+}
 
 
-    // BIT ACCESSORS
+// ****** ACCESSORS ****** //
 
-
+impl BitSequence {
     // Get the bit at index usize.
     fn get_bit(&self, index: u64) -> Option<Bit> {
         if index >= self.num_bits {
@@ -91,6 +98,7 @@ impl BitSequence {
         bits
     }
 
+    // Length attribute particularly useful when testing.
     pub(crate) fn length(&self) -> u64 {
         self.num_bits
     }
