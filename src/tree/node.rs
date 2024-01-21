@@ -17,7 +17,7 @@ use crate::tree::node::Node::{Internal, Leaf};
 // their values may overflow and there may be ties!
 #[derive(Hash)]
 pub enum Node {
-    Internal { left: Box<Node>, right: Box<Node>, freq: usize, min_freq: usize, min_byte: u8 },
+    Internal { left: Box<Node>, right: Box<Node> },
     Leaf { contents: ByteFreq },
 }
 
@@ -28,20 +28,14 @@ pub fn leaf(contents: ByteFreq) -> Node {
 }
 
 // Note that internal nodes do consume their children.
-// However, they do not maintain references to them for longer than necessary.
-pub fn internal(left: Box<Node>, right: Box<Node>) -> Node {
-    let min_byte = min(left.min_byte(), right.min_byte());
-    let min_freq = min(left.min_freq(), right.min_freq());
-    let freq = left.freq() + right.freq();
-    Internal { left, right, freq, min_byte, min_freq }
-}
+pub fn internal(left: Box<Node>, right: Box<Node>) -> Node { Internal { left, right } }
 
 /// INSTANCE METHODS
 impl Node {
     fn freq(&self) -> usize {
         match self {
-            Internal {  left, right, freq, min_freq, ..  } => {
-                *freq
+            Internal {  left, right, .. } => {
+                left.freq() + right.freq()
             }
             Leaf { contents  } => {
                 contents.freq()
@@ -53,8 +47,8 @@ impl Node {
     // What if two nodes have the same frequency?
     fn min_freq(&self) -> usize {
         match self {
-            Internal { left, right, freq, min_freq, .. } => {
-                *min_freq
+            Internal { left, right, .. } => {
+                min(left.min_freq(), right.min_freq())
             }
             Leaf { contents } => {
                 contents.freq()
@@ -64,8 +58,8 @@ impl Node {
     // For breaking ties in a node, we need the minimum byte.
     fn min_byte(&self) -> u8 {
         match self {
-            Internal { left, right, freq, min_freq, min_byte  } => {
-                *min_byte
+            Internal { left, right } => {
+                min(left.min_byte(), right.min_byte())
             }
             Leaf { contents } => {
                 contents.byte()
@@ -94,13 +88,11 @@ impl Node {
 
         // Now prepare internal nodes with children.
         while heap.len() > 1 {
-            // Greatest node is rightmost.
-            // Since highest precedence means lowest value, first left node is lowest.
             let left = heap.pop().unwrap();
             let right = heap.pop().unwrap();
 
-            let highest = internal(Box::from(left), Box::from(right));
-            heap.push(highest);
+            let parent = internal(Box::from(left), Box::from(right));
+            heap.push(parent);
         }
 
         // The last element in the heap is the root node!
@@ -132,7 +124,7 @@ impl Node {
 
         match self {
             // If it is an internal node, descend left and right, making this with 0 and 1.
-            Internal { left, right, .. } => {
+            Internal { left, right } => {
                 let mut left_path = path.clone();
                 left_path.append_bit(0);
                 let mut right_path = path.clone();
@@ -160,7 +152,7 @@ impl PartialEq for Node {
 impl Display for Node {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Internal { left, right, .. } => {
+            Internal { left, right } => {
                 let left = left.fmt(f);
                 let right = right.fmt(f);
                 if left.is_err() {
