@@ -17,20 +17,62 @@ use crate::tree::node::Node::{Internal, Leaf};
 // their values may overflow and there may be ties!
 #[derive(Hash)]
 pub enum Node {
-    Internal { left: Box<Node>, right: Box<Node> },
+    Internal { left: Box<Node>, right: Box<Node>, freq: usize, min_freq: usize, min_byte: u8 },
     Leaf { contents: ByteFreq },
 }
 
 /// CONSTRUCTORS
+/// Moving much logic to construction time.
 pub fn leaf(contents: ByteFreq) -> Node {
     Leaf { contents }
 }
+
+// Note that internal nodes do consume their children.
+// However, they do not maintain references to them for longer than necessary.
 pub fn internal(left: Box<Node>, right: Box<Node>) -> Node {
-    Internal { left, right }
+    let min_byte = min(left.min_byte(), right.min_byte());
+    let min_freq = min(left.min_freq(), right.min_freq());
+    let freq = left.freq() + right.freq();
+    Internal { left, right, freq, min_byte, min_freq }
 }
 
 /// INSTANCE METHODS
 impl Node {
+    fn freq(&self) -> usize {
+        match self {
+            Internal {  left, right, freq, min_freq, ..  } => {
+                *freq
+            }
+            Leaf { contents  } => {
+                contents.freq()
+            }
+        }
+    }
+
+    // TIEBREAKERS
+    // What if two nodes have the same frequency?
+    fn min_freq(&self) -> usize {
+        match self {
+            Internal { left, right, freq, min_freq, .. } => {
+                *min_freq
+            }
+            Leaf { contents } => {
+                contents.freq()
+            }
+        }
+    }
+    // For breaking ties in a node, we need the minimum byte.
+    fn min_byte(&self) -> u8 {
+        match self {
+            Internal { left, right, freq, min_freq, min_byte  } => {
+                *min_byte
+            }
+            Leaf { contents } => {
+                contents.byte()
+            }
+        }
+    }
+
 
     /// Prepare a Huffman tree from a given frequency map.
     /// Return the root of the tree if any items or present,
@@ -54,8 +96,8 @@ impl Node {
         while heap.len() > 1 {
             // Greatest node is rightmost.
             // Since highest precedence means lowest value, first left node is lowest.
-            let right = heap.pop().unwrap();
             let left = heap.pop().unwrap();
+            let right = heap.pop().unwrap();
 
             let highest = internal(Box::from(left), Box::from(right));
             heap.push(highest);
@@ -64,26 +106,6 @@ impl Node {
         // The last element in the heap is the root node!
         // Note: if no frequencies supplied, this will be none.
         heap.pop()
-    }
-
-    /// Return the sum of this node's counts.
-    fn sum(&self) -> usize {
-        match self {
-            Internal { left, right } =>  { left.sum() + right.sum() }
-            Leaf { contents } => contents.freq()
-        }
-    }
-
-    // For breaking ties in a node, we need the minimum byte.
-    fn min_byte(&self) -> u8 {
-        match self {
-            Internal { left, right } => {
-                min(left.min_byte(), right.min_byte())
-            }
-            Leaf { contents } => {
-                contents.byte()
-            }
-        }
     }
 
     // Generate the BitSequence for the encoding of each byte.
@@ -110,7 +132,7 @@ impl Node {
 
         match self {
             // If it is an internal node, descend left and right, making this with 0 and 1.
-            Internal { left, right } => {
+            Internal { left, right, .. } => {
                 let mut left_path = path.clone();
                 left_path.append_bit(0);
                 let mut right_path = path.clone();
@@ -129,14 +151,16 @@ impl Node {
 
 impl PartialEq for Node {
     fn eq(&self, other: &Self) -> bool {
-        self.sum() == other.sum()
+        self.freq() == other.freq()
+            && self.min_byte() == other.min_byte()
+            && self.min_freq() == other.min_freq()
     }
 }
 
 impl Display for Node {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            Internal { left, right } => {
+            Internal { left, right, .. } => {
                 let left = left.fmt(f);
                 let right = right.fmt(f);
                 if left.is_err() {
@@ -159,7 +183,9 @@ impl Eq for Node {}
 impl Ord for Node {
     // NOTE: nodes are done with a MIN HEAP!
     fn cmp(&self, other: &Self) -> Ordering {
-        other.sum().cmp(&self.sum()).then_with(|| other.min_byte().cmp(&self.min_byte()))
+        other.freq().cmp(&self.freq())
+            .then_with(|| other.min_freq().cmp(&self.min_freq()))
+            .then_with(|| other.min_byte().cmp(&self.min_byte()))
     }
 }
 
