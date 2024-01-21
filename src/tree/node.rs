@@ -51,7 +51,53 @@ fn leaf(contents: ByteFreq) -> Node { Leaf { contents } }
 // Note that internal nodes do consume their children.
 fn internal(left: Box<Node>, right: Box<Node>) -> Node { Internal { left, right } }
 
-/// INSTANCE METHODS
+
+// PUBLIC INSTANCE METHODS
+impl Node {
+    // Public interface to generate the BitSequence for the encoding of each byte.
+    pub fn gen_encoding(&self) -> HashMap<u8, BitSequence> {
+        let mut encoding: HashMap<u8, BitSequence> = HashMap::new();
+        match self {
+            Internal { .. } => {
+                self.visit_node(&mut encoding, BitSequence::new());
+            }
+            // Edge case: only one node and a path hasn't been formed yet!
+            // In this case, encode as 0.
+            Leaf { contents } => {
+                encoding.insert(contents.byte(), BitSequence::from(&[0]));
+            }
+        }
+        encoding
+    }
+
+    // Generate paths to all leaf nodes.
+    // Note: this function takes ownership of the path BitSequence
+    // Because each leaf node ought to have its own path
+    fn visit_node(&self, encoding: &mut HashMap<u8, BitSequence>,
+                  path: BitSequence) {
+
+        match self {
+            // If it is an internal node, descend left and right, making this with 0 and 1.
+            Internal { left, right } => {
+                let mut left_path = path.clone();
+                left_path.append_bit(0);
+                let mut right_path = path.clone();
+                right_path.append_bit(1);
+
+                left.visit_node(encoding, left_path);
+                right.visit_node(encoding, right_path);
+            }
+            // If we've hit a leaf node, add the encoding to the bad boy!
+            Leaf { contents } => {
+                encoding.insert(contents.byte(), path.clone());
+            }
+        }
+    }
+}
+
+
+// NODE ATTR ACCESSORS
+// useful for comparison
 impl Node {
     fn freq(&self) -> usize {
         match self {
@@ -75,50 +121,6 @@ impl Node {
             }
             Leaf { contents } => {
                 contents.byte()
-            }
-        }
-    }
-
-
-
-    // ****** ENCODING TRAVERSERS ****** //
-
-    // Generate the BitSequence for the encoding of each byte.
-    pub fn gen_encoding(&self) -> HashMap<u8, BitSequence> {
-        let mut encoding: HashMap<u8, BitSequence> = HashMap::new();
-        match self {
-            Internal { .. } => {
-                self.visit_node(&mut encoding, BitSequence::new());
-            }
-            // Edge case: only one node. Path hasn't been formed yet!
-            // In this case, encode as 0.
-            Leaf { contents } => {
-                encoding.insert(contents.byte(), BitSequence::from(&[0]));
-            }
-        }
-        encoding
-    }
-
-    // Generate paths to all root nodes.
-    // Note: this function takes ownership of the path BitSequence
-    // Because each path ought to have its own path.
-    fn visit_node(&self, encoding: &mut HashMap<u8, BitSequence>,
-        path: BitSequence) {
-
-        match self {
-            // If it is an internal node, descend left and right, making this with 0 and 1.
-            Internal { left, right } => {
-                let mut left_path = path.clone();
-                left_path.append_bit(0);
-                let mut right_path = path.clone();
-                right_path.append_bit(1);
-
-                left.visit_node(encoding, left_path);
-                right.visit_node(encoding, right_path);
-            }
-            // If we've hit a leaf node, add the encoding to the bad boy!
-            Leaf { contents } => {
-                encoding.insert(contents.byte(), path.clone());
             }
         }
     }
