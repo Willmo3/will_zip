@@ -1,5 +1,5 @@
-use std::cmp::{min, Ordering, Reverse};
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::cmp::{min, Ordering};
+use std::collections::{BinaryHeap, HashMap};
 use std::fmt::{Display, Formatter};
 use crate::encoding::bitsequence::BitSequence;
 use crate::ordering::freq::ByteFreq;
@@ -24,7 +24,7 @@ pub enum Node {
 // ****** NODE CONSTRUCTORS ****** //
 
 // HUFFMAN TREE GENERATOR IS ONLY PUBLIC CONSTRUCTOR
-pub fn huffman(ordering: &HashMap::<u8, usize>) -> Option<Node> {
+pub fn huffman(ordering: &HashMap<u8, usize>) -> Option<Node> {
     // Prepare base heap with all elements sorted by frequency.
     // These are all the leaf nodes.
 
@@ -120,7 +120,6 @@ impl Node {
                 left_path.append_bit(0);
                 let mut right_path = path.clone();
                 right_path.append_bit(1);
-
                 left.visit_node(encoding, left_path);
                 right.visit_node(encoding, right_path);
             }
@@ -175,7 +174,7 @@ mod tests {
     use std::collections::HashMap;
     use crate::encoding::bitsequence::BitSequence;
     use crate::ordering::freq::gen_frequency;
-    use crate::tree::node::{huffman, Node};
+    use crate::tree::node::{huffman};
 
     // Test that the tree generates an encoding for a single charACTER.
     #[test]
@@ -222,7 +221,7 @@ mod tests {
 
 
         let bytes: Vec<u8> = "11111111110000ASDABV2233433223123".bytes().collect();
-        let mut freq = gen_frequency(&bytes);
+        let freq = gen_frequency(&bytes);
 
         let actual_encoding = huffman(&freq).unwrap().gen_encoding();
         assert_eq!(expected_encoding, actual_encoding);
