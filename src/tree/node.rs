@@ -173,7 +173,6 @@ impl PartialOrd for Node {
 mod tests {
     use std::collections::HashMap;
     use crate::encoding::bitsequence::BitSequence;
-    use crate::ordering::freq::gen_frequency;
     use crate::tree::node::{huffman};
 
     // Test that the tree generates an encoding for a single charACTER.
