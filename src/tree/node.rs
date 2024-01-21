@@ -9,12 +9,6 @@ use crate::tree::node::Node::{Internal, Leaf};
 // A node represents either an internal node, with a left and right child,
 // Or a leaf node, with a byte:contents frequency.
 // To get the value of a node, descend left and right.
-
-// CRUCIAL: Nodes must be normalized!
-// Nodes are normalized by ordering their byte values from 0-256
-// Representing their relative frequencies.
-// If they are not normalized, and simply treated as a mapping from value -> frequency,
-// their values may overflow and there may be ties!
 #[derive(Hash, Eq, PartialEq)]
 pub enum Node {
     Internal { left: Box<Node>, right: Box<Node> },
