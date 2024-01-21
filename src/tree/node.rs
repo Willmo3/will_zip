@@ -1,4 +1,4 @@
-use std::cmp::{min, Ordering};
+use std::cmp::{min, Ordering, Reverse};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::fmt::{Display, Formatter};
 use crate::encoding::bitsequence::BitSequence;
@@ -41,7 +41,7 @@ impl Node {
 
         // Note that the binary heap is a MAX HEAP, not a min heap.
         // This means that the first items to be removed will be those with the highest precedence.
-        // Since precedence is given in reverse order of appearance, this is what we want!
+        // Need to reverse.
         let mut heap = ordering.iter().fold(
             BinaryHeap::new(), | mut heap, (byte, count) | {
 
@@ -157,9 +157,9 @@ impl Display for Node {
 impl Eq for Node {}
 
 impl Ord for Node {
+    // NOTE: nodes are done with a MIN HEAP!
     fn cmp(&self, other: &Self) -> Ordering {
-        // Min bytes of heaps used to break ties.
-        self.sum().cmp(&other.sum()).then_with(|| self.min_byte().cmp(&other.min_byte()))
+        other.sum().cmp(&self.sum()).then_with(|| other.min_byte().cmp(&self.min_byte()))
     }
 }
 
