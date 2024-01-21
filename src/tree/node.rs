@@ -89,10 +89,6 @@ impl Node {
 
 
 
-
-
-
-
     // ****** ENCODING TRAVERSERS ****** //
 
     // Generate the BitSequence for the encoding of each byte.
@@ -140,15 +136,10 @@ impl Display for Node {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Internal { left, right } => {
-                let left = left.fmt(f);
-                let right = right.fmt(f);
-                if left.is_err() {
-                    left
-                } else if right.is_err() {
-                    right
-                } else {
-                    Ok(())
-                }
+                // For simplicity, ignoring errors. This is not prod critical.
+                left.fmt(f);
+                right.fmt(f);
+                Ok(())
             }
             Leaf { contents } => {
                 f.write_fmt(format_args!("{}: {} ", contents.byte(), contents.freq()))
