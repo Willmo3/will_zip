@@ -95,7 +95,10 @@ impl BitSequence {
 impl Debug for BitSequence {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         for bit in self.get_bits() {
-            f.write_fmt(format_args!("{}", bit));
+            let result = f.write_fmt(format_args!("{}", bit));
+            if result.is_err() {
+                return result
+            }
         }
         Ok(())
     }
