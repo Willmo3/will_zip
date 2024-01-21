@@ -54,8 +54,8 @@ impl Node {
         while heap.len() > 1 {
             // Greatest node is rightmost.
             // Since highest precedence means lowest value, first left node is lowest.
-            let left = heap.pop().unwrap();
             let right = heap.pop().unwrap();
+            let left = heap.pop().unwrap();
 
             let highest = internal(Box::from(left), Box::from(right));
             heap.push(highest);
