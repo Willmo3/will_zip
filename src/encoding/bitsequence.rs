@@ -90,6 +90,10 @@ impl BitSequence {
         }
         bits
     }
+
+    pub(crate) fn length(&self) -> u64 {
+        self.num_bits
+    }
 }
 
 impl Debug for BitSequence {
