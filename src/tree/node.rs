@@ -2,7 +2,7 @@ use std::cmp::{min, Ordering};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::fmt::{Display, Formatter};
 use crate::encoding::bitsequence::BitSequence;
-use crate::ordering::byteordering::ByteOrdering;
+use crate::ordering::freq::ByteFreq;
 use crate::tree::node::Node::{Internal, Leaf};
 
 // Author: Will Morris
@@ -18,11 +18,11 @@ use crate::tree::node::Node::{Internal, Leaf};
 #[derive(Hash)]
 pub enum Node {
     Internal { left: Box<Node>, right: Box<Node> },
-    Leaf { contents: ByteOrdering },
+    Leaf { contents: ByteFreq },
 }
 
 /// CONSTRUCTORS
-pub fn leaf(contents: ByteOrdering) -> Node {
+pub fn leaf(contents: ByteFreq) -> Node {
     Leaf { contents }
 }
 pub fn internal(left: Box<Node>, right: Box<Node>) -> Node {
@@ -35,8 +35,7 @@ impl Node {
     /// Prepare a Huffman tree from a given frequency map.
     /// Return the root of the tree if any items or present,
     /// Or nothing otherwise.
-    /// NOTE that this expects a normalized frequency -- so will only take in u8!
-    pub fn huffman(ordering: &HashMap::<u8, u8>) -> Option<Node> {
+    pub fn huffman(ordering: &HashMap::<u8, usize>) -> Option<Node> {
         // Prepare base heap with all elements sorted by frequency.
         // These are all the leaf nodes.
 
@@ -46,7 +45,7 @@ impl Node {
         let mut heap = ordering.iter().fold(
             BinaryHeap::new(), | mut heap, (byte, count) | {
 
-                let freq = ByteOrdering::new(*byte, *count as usize);
+                let freq = ByteFreq::new(*byte, *count);
                 heap.push(leaf(freq));
                 heap
             });
@@ -71,7 +70,7 @@ impl Node {
     fn sum(&self) -> usize {
         match self {
             Internal { left, right } =>  { left.sum() + right.sum() }
-            Leaf { contents } => contents.precedence()
+            Leaf { contents } => contents.freq()
         }
     }
 
@@ -149,7 +148,7 @@ impl Display for Node {
                 }
             }
             Leaf { contents } => {
-                f.write_fmt(format_args!("{}: {} ", contents.byte(), contents.precedence()))
+                f.write_fmt(format_args!("{}: {} ", contents.byte(), contents.freq()))
             }
         }
     }
@@ -159,10 +158,8 @@ impl Eq for Node {}
 
 impl Ord for Node {
     fn cmp(&self, other: &Self) -> Ordering {
-        if self.sum() == other.sum() {
-            panic!("Unnormalized data!")
-        }
-        self.sum().cmp(&other.sum())
+        // Min bytes of heaps used to break ties.
+        self.sum().cmp(&other.sum()).then_with(|| self.min_byte().cmp(&other.min_byte()))
     }
 }
 
@@ -182,7 +179,7 @@ mod tests {
     #[test]
     fn test_single_encoding() {
         let byte = 1;
-        let mut freq: HashMap<u8, u8> = HashMap::new();
+        let mut freq: HashMap<u8, usize> = HashMap::new();
         freq.insert(byte, 1);
 
         /*
@@ -202,7 +199,7 @@ mod tests {
     fn test_encoding() {
         // TODO: redo test.
         // Need to account for relative ordering.
-        
+
         /*
            STRING: 1111100022334
 
@@ -221,12 +218,12 @@ mod tests {
         expected_encoding.insert(2, BitSequence::from(&[0, 1, 0, 0]));
         expected_encoding.insert(4, BitSequence::from(&[0, 1, 0, 1]));
 
-        let mut ordering: HashMap<u8, u8> = HashMap::new();
-        ordering.insert(1, 0);
-        ordering.insert(0, 1);
+        let mut ordering: HashMap<u8, usize> = HashMap::new();
+        ordering.insert(1, 5);
+        ordering.insert(0, 3);
         ordering.insert(3, 2);
-        ordering.insert(2, 3);
-        ordering.insert(4, 4);
+        ordering.insert(2, 2);
+        ordering.insert(4, 1);
 
         let actual_encoding = Node::huffman(&ordering).unwrap().gen_encoding();
         assert_eq!(expected_encoding, actual_encoding);

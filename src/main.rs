@@ -1,7 +1,7 @@
 use std::env;
 use std::process;
 use std::fs;
-use crate::ordering::freq::gen_ordering;
+use crate::ordering::freq::gen_frequency;
 use crate::tree::node::Node;
 
 // Given a file F, this program converts F into a HuffmanEncoding and saves a copy of it
@@ -16,9 +16,6 @@ mod tree {
 mod ordering {
     // Generates an ordering of bytes-frequency of appearance.
     pub mod freq;
-    // Abstract ordering of byte to precedence.
-    // Used by freq to order by frequency.
-    pub mod byteordering;
 }
 
 // Encodings are used when serializing the file to save space.
@@ -53,7 +50,7 @@ fn main() {
         },
     };
 
-    let ordering = gen_ordering(&bytes);
+    let ordering = gen_frequency(&bytes);
     let heap = Node::huffman(&ordering);
 
     // Create an empty file, do not do any additional work.
