@@ -21,14 +21,43 @@ pub enum Node {
     Leaf { contents: ByteFreq },
 }
 
-/// CONSTRUCTORS
-/// Moving much logic to construction time.
-pub fn leaf(contents: ByteFreq) -> Node {
-    Leaf { contents }
+// ****** NODE CONSTRUCTORS ****** //
+
+// HUFFMAN TREE GENERATOR IS ONLY PUBLIC CONSTRUCTOR
+pub fn huffman(ordering: &HashMap::<u8, usize>) -> Option<Node> {
+    // Prepare base heap with all elements sorted by frequency.
+    // These are all the leaf nodes.
+
+    // Note that the binary heap is a MAX HEAP, not a min heap.
+    // This means that the first items to be removed will be those with the highest precedence.
+    // Need to reverse.
+    let mut heap = ordering.iter().fold(
+        BinaryHeap::new(), | mut heap, (byte, count) | {
+
+            let freq = ByteFreq::new(*byte, *count);
+            heap.push(leaf(freq));
+            heap
+        });
+
+    // Now prepare internal nodes with children.
+    while heap.len() > 1 {
+        let left = heap.pop().unwrap();
+        let right = heap.pop().unwrap();
+
+        let parent = internal(Box::from(left), Box::from(right));
+        heap.push(parent);
+    }
+
+    // The last element in the heap is the root node!
+    // Note: if no frequencies supplied, this will be none.
+    heap.pop()
 }
 
+// PRIVATE CONSTRUCTORS USED DURING CREATION OF HUFFMAN TREE
+fn leaf(contents: ByteFreq) -> Node { Leaf { contents } }
+
 // Note that internal nodes do consume their children.
-pub fn internal(left: Box<Node>, right: Box<Node>) -> Node { Internal { left, right } }
+fn internal(left: Box<Node>, right: Box<Node>) -> Node { Internal { left, right } }
 
 /// INSTANCE METHODS
 impl Node {
@@ -60,39 +89,7 @@ impl Node {
 
 
 
-    // ****** NODE CONSTRUCTOR ****** //
 
-    /// Prepare a Huffman tree from a given frequency map.
-    /// Return the root of the tree if any items are present,
-    /// Or nothing otherwise.
-    pub fn huffman(ordering: &HashMap::<u8, usize>) -> Option<Node> {
-        // Prepare base heap with all elements sorted by frequency.
-        // These are all the leaf nodes.
-
-        // Note that the binary heap is a MAX HEAP, not a min heap.
-        // This means that the first items to be removed will be those with the highest precedence.
-        // Need to reverse.
-        let mut heap = ordering.iter().fold(
-            BinaryHeap::new(), | mut heap, (byte, count) | {
-
-                let freq = ByteFreq::new(*byte, *count);
-                heap.push(leaf(freq));
-                heap
-            });
-
-        // Now prepare internal nodes with children.
-        while heap.len() > 1 {
-            let left = heap.pop().unwrap();
-            let right = heap.pop().unwrap();
-
-            let parent = internal(Box::from(left), Box::from(right));
-            heap.push(parent);
-        }
-
-        // The last element in the heap is the root node!
-        // Note: if no frequencies supplied, this will be none.
-        heap.pop()
-    }
 
 
 
@@ -187,7 +184,7 @@ mod tests {
     use std::collections::HashMap;
     use crate::encoding::bitsequence::BitSequence;
     use crate::ordering::freq::gen_frequency;
-    use crate::tree::node::Node;
+    use crate::tree::node::{huffman, Node};
 
     // Test that the tree generates an encoding for a single charACTER.
     #[test]
@@ -203,7 +200,7 @@ mod tests {
 
         let mut expected_encoding: HashMap<u8, BitSequence> = HashMap::new();
         expected_encoding.insert(byte, BitSequence::from(&[0]));
-        let actual_encoding: HashMap<u8, BitSequence> = Node::huffman(&freq).unwrap().gen_encoding();
+        let actual_encoding: HashMap<u8, BitSequence> = huffman(&freq).unwrap().gen_encoding();
 
         assert_eq!(expected_encoding, actual_encoding);
     }
@@ -236,7 +233,7 @@ mod tests {
         let bytes: Vec<u8> = "11111111110000ASDABV2233433223123".bytes().collect();
         let mut freq = gen_frequency(&bytes);
 
-        let actual_encoding = Node::huffman(&freq).unwrap().gen_encoding();
+        let actual_encoding = huffman(&freq).unwrap().gen_encoding();
         assert_eq!(expected_encoding, actual_encoding);
     }
 }

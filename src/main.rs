@@ -2,7 +2,7 @@ use std::env;
 use std::process;
 use std::fs;
 use crate::ordering::freq::gen_frequency;
-use crate::tree::node::Node;
+use crate::tree::node::{huffman, Node};
 
 // Given a file F, this program converts F into a HuffmanEncoding and saves a copy of it
 // Or given an already-encoded file F', this program converts it into a decoded file F.
@@ -51,7 +51,7 @@ fn main() {
     };
 
     let ordering = gen_frequency(&bytes);
-    let heap = Node::huffman(&ordering);
+    let heap = huffman(&ordering);
 
     // Create an empty file, do not do any additional work.
     // This allows future encoding to rely on no "nones" being present.
