@@ -33,9 +33,7 @@ pub fn huffman(ordering: &HashMap<u8, usize>) -> Option<Node> {
     // Need to reverse.
     let mut heap = ordering.iter().fold(
         BinaryHeap::new(), | mut heap, (byte, count) | {
-
-            let freq = ByteFreq::new(*byte, *count);
-            heap.push(leaf(freq));
+            heap.push(leaf(ByteFreq::new(*byte, *count)));
             heap
         });
 
@@ -120,6 +118,7 @@ impl Node {
                 left_path.append_bit(0);
                 let mut right_path = path.clone();
                 right_path.append_bit(1);
+
                 left.visit_node(encoding, left_path);
                 right.visit_node(encoding, right_path);
             }
