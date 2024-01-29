@@ -201,5 +201,19 @@ mod serialize_tests {
         let to = BitSequence::from_stream(&from);
         assert_eq!(0, to.num_bits);
     }
+
+    #[test]
+    fn test_real_bitseq() {
+        let mut seq = BitSequence::new();
+        for i in 0..10 {
+            seq.append_bit(0);
+        }
+        seq.append_bit(1);
+
+        let bytes = seq.clone().to_stream();
+        let from = BitSequence::from_stream(&bytes);
+
+        assert_eq!(seq, from);
+    }
 }
 
