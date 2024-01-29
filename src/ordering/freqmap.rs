@@ -6,6 +6,7 @@
 use std::collections::HashMap;
 use crate::file::bytestream::{ByteStream, LONG_LEN, slice_to_long};
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Freqmap {
     data: HashMap<u8, u64>
 }

@@ -14,6 +14,7 @@ use crate::encoding::bitsequence::BitSequence;
 use crate::file::bytestream::{ByteStream, LONG_LEN, slice_to_long};
 use crate::ordering::freqmap::Freqmap;
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Wzfile {
     map: Freqmap,
     seq: BitSequence
@@ -43,12 +44,12 @@ impl ByteStream for Wzfile {
 
         let map_len: usize = slice_to_long(&bytes[..LONG_LEN]) as usize;
         i += LONG_LEN;
-        let map = Freqmap::from_stream(&bytes[i..map_len as usize]);
+        let map = Freqmap::from_stream(&bytes[i..i + map_len]);
         i += map_len;
 
-        let bit_len = slice_to_long(&bytes[i..LONG_LEN]) as usize;
+        let bit_len = slice_to_long(&bytes[i..i + LONG_LEN]) as usize;
         i += LONG_LEN;
-        let bits = BitSequence::from_stream(&bytes[i..]);
+        let bits = BitSequence::from_stream(&bytes[i.. i + bit_len]);
         i += bit_len;
 
         assert_eq!(i, bytes.len());
@@ -72,4 +73,25 @@ impl ByteStream for Wzfile {
 
         retval
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+    use crate::encoding::bitsequence::BitSequence;
+    use crate::file::bytestream::ByteStream;
+    use crate::file::wzfile::Wzfile;
+
+    #[test]
+    fn test_no_len() {
+        let empty_map = HashMap::new();
+        let empty_seq = BitSequence::new();
+        let expected = Wzfile::new(empty_map, empty_seq);
+
+        let to = expected.clone().to_stream();
+        let from = Wzfile::from_stream(&to);
+
+        assert_eq!(expected, from);
+    }
+
 }
