@@ -18,10 +18,10 @@ impl Freqmap {
         }
     }
 
-    // Since a freqmap is just a wrapper for a hashmap, allow access to the reference.
-    // This can then be cloned for its relevant uses later.
-    pub fn take(&self) -> &HashMap<u8, usize> {
-        &self.data
+    // FreqMap is really just a wrapper for serialization.
+    // Therefore, it is acceptable to take ownership when you need the map.
+    pub fn take(self) -> HashMap<u8, usize> {
+        self.data
     }
 }
 
@@ -59,9 +59,10 @@ impl ByteStream for Freqmap {
     }
 
     // Convert one of these bad boys to a byte stream.
-    fn to_stream(&self) -> Vec<u8> {
+    //
+    fn to_stream(self) -> Vec<u8> {
         let mut retval = Vec::new();
-        let data = self.take().clone();
+        let data = self.take();
         for (byte, value) in data {
             retval.push(byte);
             retval.append(&mut Vec::from(value.to_le_bytes()));
@@ -80,7 +81,7 @@ mod tests {
     fn test_empty_to() {
         let bytes = vec![];
         let to = Freqmap::from_stream(&bytes);
-        let from = Freqmap::to_stream(&to);
+        let from = to.to_stream();
         assert_eq!(bytes, from);
     }
 
@@ -94,7 +95,7 @@ mod tests {
         let from = Freqmap::new(map.clone()).to_stream();
         let to = Freqmap::from_stream(&from);
 
-        let to_map = to.take().clone();
+        let to_map = to.take();
         assert_eq!(map, to_map);
     }
 }

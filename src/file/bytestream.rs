@@ -9,6 +9,8 @@ pub trait ByteStream {
     // an object of this type can be constructed.
     fn from_stream(bytes: &[u8]) -> Self::Data;
 
-    // Any implementing type can be converted into a vector of bytes.
-    fn to_stream(&self) -> Vec<u8>;
+    // This function converts self to a byte vector, taking ownership.
+    // Typically, converting into a stream is the last step before file serialization.
+    // However, if you need self back, from_stream will work on a proper implementation.
+    fn to_stream(self) -> Vec<u8>;
 }
