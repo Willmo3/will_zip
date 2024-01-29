@@ -42,13 +42,10 @@ fn main() {
         process::exit(1)
     });
 
-    let bytes: Vec<u8> = match fs::read(&filename) {
-        Ok(bytes) => bytes,
-        Err(_) => {
-            println!("File not found: {}", &filename);
-            process::exit(1)
-        },
-    };
+    let bytes: Vec<u8> = fs::read(&filename).unwrap_or_else(|_| {
+        println!("File not found: {}", &filename);
+        process::exit(1)
+    });
 
     let ordering = gen_frequency(&bytes);
     let heap = huffman(&ordering);
