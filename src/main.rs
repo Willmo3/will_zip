@@ -29,6 +29,7 @@ mod file {
     // Anything which can be represented as a stream of bytes uses this trait.
     // This allows for easier deserialization... given a byte array, an object will come out!
     pub mod bytestream;
+    pub mod wzfile;
 }
 
 fn main() {
