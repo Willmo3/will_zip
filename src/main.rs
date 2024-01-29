@@ -58,5 +58,5 @@ fn main() {
 
     let heap = heap.unwrap();
     let encoding = heap.gen_encoding();
-    println!("{}", heap);
+    println!("{:?}", encoding);
 }
