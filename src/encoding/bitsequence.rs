@@ -126,7 +126,7 @@ impl ByteStream for BitSequence {
     type Data = BitSequence;
 
     fn from_stream(bytes: &[u8]) -> Self::Data {
-        let num_bits = slice_to_long(bytes);
+        let num_bits = slice_to_long(&bytes[..LONG_LEN]);
         let data = &bytes[LONG_LEN..];
         BitSequence::from(num_bits, data)
     }
