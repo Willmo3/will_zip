@@ -12,16 +12,16 @@ pub struct Freqmap {
 }
 
 impl Freqmap {
-    pub fn new() -> Self {
+    pub fn new(map: HashMap<u8, usize>) -> Self {
         Freqmap {
-            data: HashMap::new()
+            data: map
         }
     }
 
     // Since a freqmap is just a wrapper for a hashmap, allow access to the reference.
-    // This simplifies the external API.
-    pub fn take(&mut self) -> &mut HashMap<u8, usize> {
-        &mut self.data
+    // This can then be cloned for its relevant uses later.
+    pub fn take(&self) -> &HashMap<u8, usize> {
+        &self.data
     }
 }
 
@@ -34,12 +34,15 @@ impl ByteStream for Freqmap {
     fn from_stream(bytes: &[u8]) -> Self::Data {
         const LONG_LEN: usize = size_of::<u64>();
 
-        let mut deserialized = Freqmap::new();
-        let map = deserialized.take();
+        let mut map: HashMap<u8, usize> = HashMap::new();
+        // premature exit: too small!
+        if bytes.len() <= LONG_LEN + 1 {
+            return Freqmap::new(map);
+        }
 
+        let bound= bytes.len() - 1 - LONG_LEN;
         let mut i = 0;
-        let bound = bytes.len() - 1 - LONG_LEN;
-
+        
         while i < bound {
             let byte = bytes[i];
             i += 1;
@@ -52,10 +55,31 @@ impl ByteStream for Freqmap {
             map.insert(byte, val);
         }
 
-        deserialized
+        Freqmap::new(map)
     }
 
+    // Convert one of these bad boys to a byte stream.
     fn to_stream(&self) -> Vec<u8> {
-        todo!()
+        let mut retval = Vec::new();
+        let data = self.take().clone();
+        for (byte, value) in data {
+            retval.push(byte);
+            retval.append(&mut Vec::from(value.to_le_bytes()));
+        }
+        retval
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::file::bytestream::ByteStream;
+    use crate::ordering::freqmap::Freqmap;
+
+    #[test]
+    fn test_empty_to() {
+        let bytes = vec![];
+        let to = Freqmap::from_stream(&bytes);
+        let from = Freqmap::to_stream(&to);
+        assert_eq!(bytes, from);
     }
 }
