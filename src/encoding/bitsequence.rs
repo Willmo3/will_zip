@@ -1,4 +1,6 @@
 use std::fmt::{Debug, Formatter};
+use std::mem::size_of;
+use crate::file::bytestream::ByteStream;
 
 // A BitSequence encapsulates a string of bits and methods for interacting with them.
 // Author: Will Morris
@@ -36,8 +38,8 @@ impl BitSequence {
     }
 
     // Create a BitSequence from a vector and length in bits.
-    pub(crate) fn from(num_bits: u64, bytes: Vec::<u8>) -> Self {
-        Self { num_bits, bytes }
+    pub(crate) fn from(num_bits: u64, bytes: &[u8]) -> Self {
+        Self { num_bits, bytes: bytes.to_vec() }
     }
 }
 
@@ -118,6 +120,27 @@ impl Debug for BitSequence {
             }
         }
         Ok(())
+    }
+}
+
+impl ByteStream for BitSequence {
+    type Data = BitSequence;
+
+    fn from_stream(bytes: &[u8]) -> Self::Data {
+        const LONG_LEN: usize = size_of::<u64>();
+
+        let mut size_buf = [0u8; LONG_LEN];
+        size_buf.copy_from_slice(&bytes[..LONG_LEN]);
+        let num_bits: u64 = usize::from_le_bytes(size_buf) as u64;
+
+        let mut data = &bytes[LONG_LEN..];
+        BitSequence::from(num_bits, data);
+
+        todo!()
+    }
+
+    fn to_stream(self) -> Vec<u8> {
+        todo!()
     }
 }
 
