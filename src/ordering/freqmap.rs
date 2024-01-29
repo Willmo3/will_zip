@@ -4,21 +4,20 @@
 // Author: Will Morris
 
 use std::collections::HashMap;
-use std::mem::size_of;
-use crate::file::bytestream::ByteStream;
+use crate::file::bytestream::{ByteStream, LONG_LEN, slice_to_long};
 
 pub struct Freqmap {
-    data: HashMap<u8, usize>
+    data: HashMap<u8, u64>
 }
 
 impl Freqmap {
-    pub fn new(map: HashMap<u8, usize>) -> Self {
+    pub fn new(map: HashMap<u8, u64>) -> Self {
         Freqmap { data: map }
     }
 
     // FreqMap is really just a wrapper for serialization.
     // Therefore, it is acceptable to take ownership when you need the map.
-    pub fn take(self) -> HashMap<u8, usize> {
+    pub fn take(self) -> HashMap<u8, u64> {
         self.data
     }
 }
@@ -30,9 +29,7 @@ impl ByteStream for Freqmap {
     // Given a stream of bytes containing key-value pairs.
     // Convert that stream into a hashmap of those pairs.
     fn from_stream(bytes: &[u8]) -> Self::Data {
-        const LONG_LEN: usize = size_of::<u64>();
-
-        let mut map: HashMap<u8, usize> = HashMap::new();
+        let mut map: HashMap<u8, u64> = HashMap::new();
         // premature exit: too small!
         if bytes.len() <= LONG_LEN + 1 {
             return Freqmap::new(map);
@@ -44,12 +41,8 @@ impl ByteStream for Freqmap {
         while i <= bound {
             let byte = bytes[i];
             i += 1;
-
-            let mut buf = [0u8; LONG_LEN];
-            buf.copy_from_slice(&bytes[i..i+LONG_LEN]);
-            let val: usize = usize::from_le_bytes(buf);
+            let val = slice_to_long(&bytes[i..i+LONG_LEN]);
             i+= LONG_LEN;
-
             map.insert(byte, val);
         }
 

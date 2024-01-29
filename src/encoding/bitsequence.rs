@@ -1,6 +1,5 @@
 use std::fmt::{Debug, Formatter};
-use std::mem::size_of;
-use crate::file::bytestream::ByteStream;
+use crate::file::bytestream::{ByteStream, LONG_LEN, slice_to_long};
 
 // A BitSequence encapsulates a string of bits and methods for interacting with them.
 // Author: Will Morris
@@ -11,7 +10,7 @@ type Bit = u8;
 pub(crate) struct BitSequence {
     // NOTE: in most cases, u64 will be equal to usize, so indexing with u64 will work.
     // The only time this wouldn't work is:
-    // 1. you're on a 32 bit system
+    // 1. you're on a 32-bit system
     // 2. you attempt to access an index larger than the u32 size limit
     // (i.e. when compressing a very large file)
     // In this case, the overflow will cause a panic, avoiding undefined behavior.
@@ -127,12 +126,7 @@ impl ByteStream for BitSequence {
     type Data = BitSequence;
 
     fn from_stream(bytes: &[u8]) -> Self::Data {
-        const LONG_LEN: usize = size_of::<u64>();
-
-        let mut size_buf = [0u8; LONG_LEN];
-        size_buf.copy_from_slice(&bytes[..LONG_LEN]);
-        let num_bits: u64 = usize::from_le_bytes(size_buf) as u64;
-
+        let num_bits = slice_to_long(bytes);
         let data = &bytes[LONG_LEN..];
         BitSequence::from(num_bits, data)
     }
