@@ -28,7 +28,6 @@ impl ByteFreq {
     pub fn new(byte: u8, frequency: usize) -> Self {
         Self { byte, frequency }
     }
-
     pub fn byte(&self) -> u8 {
         self.byte
     }
