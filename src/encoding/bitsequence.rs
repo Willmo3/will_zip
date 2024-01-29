@@ -189,3 +189,17 @@ mod tests {
     }
 }
 
+#[cfg(test)]
+mod serialize_tests {
+    use crate::encoding::bitsequence::BitSequence;
+    use crate::file::bytestream::ByteStream;
+
+    #[test]
+    fn test_empty_bitseq() {
+        let seq = BitSequence::new();
+        let from = seq.to_stream();
+        let to = BitSequence::from_stream(&from);
+        assert_eq!(0, to.num_bits);
+    }
+}
+
