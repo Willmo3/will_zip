@@ -13,9 +13,7 @@ pub struct Freqmap {
 
 impl Freqmap {
     pub fn new(map: HashMap<u8, usize>) -> Self {
-        Freqmap {
-            data: map
-        }
+        Freqmap { data: map }
     }
 
     // FreqMap is really just a wrapper for serialization.
@@ -25,7 +23,7 @@ impl Freqmap {
     }
 }
 
-
+// Primary purpose of freqmap: enable serialization
 impl ByteStream for Freqmap {
     type Data = Freqmap;
 
@@ -58,8 +56,7 @@ impl ByteStream for Freqmap {
         Freqmap::new(map)
     }
 
-    // Convert one of these bad boys to a byte stream.
-    //
+    // Convert one of these bad boys into a byte stream.
     fn to_stream(self) -> Vec<u8> {
         let mut retval = Vec::new();
         let data = self.take();
