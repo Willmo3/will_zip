@@ -18,7 +18,7 @@ pub enum Node {
 // ****** NODE CONSTRUCTORS ****** //
 
 // HUFFMAN TREE GENERATOR IS ONLY PUBLIC CONSTRUCTOR
-pub fn huffman(ordering: &HashMap<u8, usize>) -> Option<Node> {
+pub fn huffman(ordering: &HashMap<u8, u64>) -> Option<Node> {
     // Prepare base heap with all elements sorted by frequency.
     // These are all the leaf nodes.
 
@@ -99,7 +99,7 @@ impl Node {
 // NODE ATTR ACCESSORS
 // useful for comparison
 impl Node {
-    fn freq(&self) -> usize {
+    fn freq(&self) -> u64 {
         match self {
             Internal {  left, right, .. } => {
                 left.freq() + right.freq()
@@ -179,7 +179,7 @@ mod tests {
     #[test]
     fn test_single_encoding() {
         let byte = 1;
-        let mut freq: HashMap<u8, usize> = HashMap::new();
+        let mut freq: HashMap<u8, u64> = HashMap::new();
         freq.insert(byte, 1);
 
         /*
@@ -199,7 +199,7 @@ mod tests {
     // Therefore, checking not exact encodings, but rather, encoding lengths.
     #[test]
     fn test_encoding() {
-        let mut freq: HashMap<u8, usize> = HashMap::new();
+        let mut freq: HashMap<u8, u64> = HashMap::new();
         freq.insert(1, 11);
         freq.insert(0, 4);
         freq.insert(2, 5);

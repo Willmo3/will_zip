@@ -5,8 +5,8 @@ use std::collections::HashMap;
 // Author: Will Morris
 
 // Generate a frequency of all the bytes in a file.
-pub fn gen_frequency(bytes: &[u8]) -> HashMap<u8, usize> {
-    bytes.iter().fold(HashMap::<u8, usize>::new(), | mut map, curr | {
+pub fn gen_frequency(bytes: &[u8]) -> HashMap<u8, u64> {
+    bytes.iter().fold(HashMap::<u8, u64>::new(), | mut map, curr | {
         if !map.contains_key(curr) {
             map.insert(*curr, 0);
         }

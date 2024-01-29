@@ -5,17 +5,17 @@ use std::cmp::Ordering;
 #[derive(PartialEq, Eq, Debug, Hash)]
 pub struct ByteFreq {
     byte: u8,
-    frequency: usize,
+    frequency: u64,
 }
 
 impl ByteFreq {
-    pub fn new(byte: u8, frequency: usize) -> Self {
+    pub fn new(byte: u8, frequency: u64) -> Self {
         Self { byte, frequency }
     }
     pub fn byte(&self) -> u8 {
         self.byte
     }
-    pub fn freq(&self) -> usize {
+    pub fn freq(&self) -> u64 {
         self.frequency
     }
 }
