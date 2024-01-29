@@ -16,6 +16,7 @@ mod tree {
 mod ordering {
     // Generates an ordering of bytes-frequency of appearance.
     pub mod freq;
+    pub(crate) mod bytefreq;
 }
 
 // Encodings are used when serializing the file to save space.

@@ -2,7 +2,7 @@ use std::cmp::{min, Ordering};
 use std::collections::{BinaryHeap, HashMap};
 use std::fmt::{Display, Formatter};
 use crate::encoding::bitsequence::BitSequence;
-use crate::ordering::freq::ByteFreq;
+use crate::ordering::bytefreq::ByteFreq;
 use crate::tree::node::Node::{Internal, Leaf};
 
 // Author: Will Morris
