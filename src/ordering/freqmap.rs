@@ -42,8 +42,8 @@ impl ByteStream for Freqmap {
 
         let bound= bytes.len() - 1 - LONG_LEN;
         let mut i = 0;
-        
-        while i < bound {
+
+        while i <= bound {
             let byte = bytes[i];
             i += 1;
 
@@ -72,6 +72,7 @@ impl ByteStream for Freqmap {
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashMap;
     use crate::file::bytestream::ByteStream;
     use crate::ordering::freqmap::Freqmap;
 
@@ -81,5 +82,19 @@ mod tests {
         let to = Freqmap::from_stream(&bytes);
         let from = Freqmap::to_stream(&to);
         assert_eq!(bytes, from);
+    }
+
+    #[test]
+    fn test_to_from() {
+        let mut map = HashMap::new();
+        map.insert(0, 52);
+        map.insert(4, 14);
+        map.insert(1, 22);
+
+        let from = Freqmap::new(map.clone()).to_stream();
+        let to = Freqmap::from_stream(&from);
+
+        let to_map = to.take().clone();
+        assert_eq!(map, to_map);
     }
 }
