@@ -133,14 +133,15 @@ impl ByteStream for BitSequence {
         size_buf.copy_from_slice(&bytes[..LONG_LEN]);
         let num_bits: u64 = usize::from_le_bytes(size_buf) as u64;
 
-        let mut data = &bytes[LONG_LEN..];
-        BitSequence::from(num_bits, data);
-
-        todo!()
+        let data = &bytes[LONG_LEN..];
+        BitSequence::from(num_bits, data)
     }
 
-    fn to_stream(self) -> Vec<u8> {
-        todo!()
+    fn to_stream(mut self) -> Vec<u8> {
+        let mut retval = vec![];
+        retval.append(&mut Vec::from(self.num_bits.to_le_bytes()));
+        retval.append(&mut self.bytes);
+        retval
     }
 }
 
