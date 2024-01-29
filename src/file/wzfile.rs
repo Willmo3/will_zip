@@ -42,7 +42,7 @@ impl ByteStream for Wzfile {
     fn from_stream(bytes: &[u8]) -> Self::Data {
         let mut i = 0;
 
-        let map_len: usize = slice_to_long(&bytes[..LONG_LEN]) as usize;
+        let map_len = slice_to_long(&bytes[..LONG_LEN]) as usize;
         i += LONG_LEN;
         let map = Freqmap::from_stream(&bytes[i..i + map_len]);
         i += map_len;
