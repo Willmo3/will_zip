@@ -64,7 +64,7 @@ impl Node {
             // Edge case: only one node and a path hasn't been formed yet!
             // In this case, encode as 0.
             Leaf { contents } => {
-                encoding.insert(contents.byte(), BitSequence::from(&[0]));
+                encoding.insert(contents.byte(), BitSequence::from_bits(&[0]));
             }
         }
         encoding
@@ -188,7 +188,7 @@ mod tests {
          */
 
         let mut expected_encoding: HashMap<u8, BitSequence> = HashMap::new();
-        expected_encoding.insert(byte, BitSequence::from(&[0]));
+        expected_encoding.insert(byte, BitSequence::from_bits(&[0]));
         let actual_encoding: HashMap<u8, BitSequence> = huffman(&freq).unwrap().gen_encoding();
 
         assert_eq!(expected_encoding, actual_encoding);

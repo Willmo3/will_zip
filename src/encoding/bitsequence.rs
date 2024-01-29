@@ -28,11 +28,16 @@ impl BitSequence {
         }
     }
 
-    // Crate a BitSequence from a string of bits.
-    pub(crate) fn from(bits: &[Bit]) -> Self {
+    // Create a BitSequence from a string of bits.
+    pub(crate) fn from_bits(bits: &[Bit]) -> Self {
         let mut seq = Self::new();
         seq.append_bits(bits);
         seq
+    }
+
+    // Create a BitSequence from a vector and length in bits.
+    pub(crate) fn from(num_bits: u64, bytes: Vec::<u8>) -> Self {
+        Self { num_bits, bytes }
     }
 }
 
