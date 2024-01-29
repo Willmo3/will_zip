@@ -94,4 +94,23 @@ mod tests {
         assert_eq!(expected, from);
     }
 
+    #[test]
+    fn test_real_deal() {
+        let mut map: HashMap<u8, u64> = HashMap::new();
+        for i in 0..20 {
+            map.insert(i, i as u64 * i as u64);
+        }
+
+        let mut seq = BitSequence::new();
+        for i in 0..33 {
+            seq.append_bit(i % 2);
+        }
+
+        let expected = Wzfile::new(map, seq);
+
+        let to = expected.clone().to_stream();
+        let from = Wzfile::from_stream(&to);
+
+        assert_eq!(expected, from);
+    }
 }
