@@ -1,6 +1,8 @@
 use std::env;
 use std::process;
 use std::fs;
+use crate::encoding::bitsequence::BitSequence;
+use crate::file::bytestream::ByteStream;
 use crate::ordering::freq::gen_frequency;
 use crate::tree::node::{huffman, Node};
 
@@ -58,5 +60,6 @@ fn main() {
 
     let heap = heap.unwrap();
     let encoding = heap.gen_encoding();
-    println!("{:?}", encoding);
+    let seq = BitSequence::translate(&bytes, &encoding);
+    println!("{:?}", seq.to_stream());
 }

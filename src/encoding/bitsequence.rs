@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
 use crate::file::bytestream::{ByteStream, LONG_LEN, slice_to_long};
 
@@ -40,6 +41,15 @@ impl BitSequence {
     pub(crate) fn from(num_bits: u64, bytes: &[u8]) -> Self {
         Self { num_bits, bytes: bytes.to_vec() }
     }
+
+    // Translate a collection of bytes into a large bitsequence.
+    pub(crate) fn translate(bytes: &[u8], encoding: &HashMap<u8, BitSequence>) -> Self {
+        let mut retval = BitSequence::new();
+        for byte in bytes {
+            retval.append_seq(encoding.get(byte).unwrap());
+        }
+        retval
+    }
 }
 
 
@@ -72,7 +82,7 @@ impl BitSequence {
     // Assimilate a BitSequence into this sequence.
     // Useful for removing temporary BitSequences from the equation
     // if you want to keep your BitSequence, use append_bits
-    fn append_seq(&mut self, seq: BitSequence) {
+    fn append_seq(&mut self, seq: &BitSequence) {
         self.append_bits(&seq.get_bits());
     }
 }
@@ -178,7 +188,7 @@ mod tests {
             seq2.append_bit((i + 1) % 2);
         }
 
-        seq1.append_seq(seq2);
+        seq1.append_seq(&seq2);
         assert_eq!(0, seq1.get_bit(127).unwrap());
     }
 }
