@@ -1,8 +1,11 @@
 use std::env;
 use std::process;
 use std::fs;
+use std::fs::File;
+use std::io::Write;
 use crate::encoding::bitsequence::BitSequence;
 use crate::file::bytestream::ByteStream;
+use crate::file::wzfile::Wzfile;
 use crate::ordering::freq::gen_frequency;
 use crate::tree::node::{huffman, Node};
 
@@ -61,5 +64,8 @@ fn main() {
     let heap = heap.unwrap();
     let encoding = heap.gen_encoding();
     let seq = BitSequence::translate(&bytes, &encoding);
-    println!("{:?}", seq.to_stream());
+    let bytes = Wzfile::new(ordering, seq).to_stream();
+
+    let mut output = File::create("test.wz").unwrap();
+    output.write_all(&bytes).unwrap();
 }
