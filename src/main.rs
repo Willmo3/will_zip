@@ -75,7 +75,7 @@ fn main() {
 }
 
 
-// ****** FILE COMPRESSOR ****** //
+// ****** COMPRESSOR ****** //
 
 // Returns exit status of program
 fn compress(bytes: &[u8]) -> Vec<u8>{
@@ -96,7 +96,7 @@ fn compress(bytes: &[u8]) -> Vec<u8>{
 }
 
 
-// ****** FILE DECOMPRESSOR ****** //
+// ****** DECOMPRESSOR ****** //
 
 // Returns exit status of program
 fn decompress(bytes: &[u8]) -> Vec<u8> {
