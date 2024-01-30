@@ -62,29 +62,6 @@ fn main() {
     }
 
     // For now, only checking that there is a second arg.
-
-    /*
-    let bytes: Vec<u8> = fs::read(&filename).unwrap_or_else(|_| {
-        println!("File not found: {}", &filename);
-        process::exit(1)
-    });
-
-    let ordering = gen_frequency(&bytes);
-    let heap = huffman(&ordering);
-
-    // Create an empty file, do not do any additional work.
-    // This allows future encoding to rely on no "nones" being present.
-    if heap.is_none() {
-        return;
-    }
-
-    let heap = heap.unwrap();
-    let encoding = heap.gen_encoding();
-    let seq = BitSequence::translate(&bytes, &encoding);
-    let bytes = Wzfile::new(ordering, seq).to_stream();
-
-    let mut output = File::create("test.wz").unwrap();
-    output.write_all(&bytes).unwrap(); */
 }
 
 
@@ -92,6 +69,31 @@ fn main() {
 
 // Returns exit status of program
 fn compress(input_filename: &str, output_filename: &str) -> i32 {
+    let bytes: Vec<u8> = match fs::read(&input_filename) {
+        Ok(val) => { val }
+        Err(_) => {
+            println!("File not found: {}", &input_filename);
+            return 1
+        }
+    };
+
+    let ordering = gen_frequency(&bytes);
+    let heap = huffman(&ordering);
+
+    // Create an empty file, do not do any additional work.
+    // This allows future encoding to rely on no "nones" being present.
+    if heap.is_none() {
+        File::create(output_filename).unwrap();
+        return 0;
+    }
+
+    let heap = heap.unwrap();
+    let encoding = heap.gen_encoding();
+    let seq = BitSequence::translate(&bytes, &encoding);
+    let bytes = Wzfile::new(ordering, seq).to_stream();
+
+    let mut output = File::create(output_filename).unwrap();
+    output.write_all(&bytes).unwrap();
     0
 }
 
@@ -102,8 +104,6 @@ fn compress(input_filename: &str, output_filename: &str) -> i32 {
 fn decompress(input_filename: &str, output_filename: &str) -> i32 {
     0
 }
-
-
 
 
 // ****** ARGUMENT CHECKERS ****** //
@@ -174,7 +174,7 @@ fn parse_args(input_filename: &mut String,
         }
         Some(val) => { val }
     };
-    
+
     // If we get all the way here, no exit code. Keep the program going!
     None
 }
