@@ -92,7 +92,7 @@ impl BitSequence {
 
 impl BitSequence {
     // Get the bit at index usize.
-    fn get_bit(&self, index: u64) -> Option<Bit> {
+    pub(crate) fn get_bit(&self, index: u64) -> Option<Bit> {
         if index >= self.num_bits {
             return None;
         }
