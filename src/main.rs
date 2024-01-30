@@ -64,46 +64,43 @@ fn main() {
 
     // We've validated that zip or unzip must be true.
     // So no need to check unzip here -- if not zip, then go!
-    if zip {
-        exit(compress(&bytes, &output_file))
-    } else {
-        exit(decompress(&bytes, &output_file))
-    }
+    let to_write = match zip {
+        true => { compress(&bytes) }
+        false => { decompress(&bytes) }
+    };
 
-    // For now, only checking that there is a second arg.
+    let mut output_file = File::create(output_file).unwrap();
+    output_file.write_all(&to_write).unwrap();
+    exit(0)
 }
 
 
 // ****** FILE COMPRESSOR ****** //
 
 // Returns exit status of program
-fn compress(bytes: &[u8], output_filename: &str) -> i32 {
+fn compress(bytes: &[u8]) -> Vec<u8>{
     let ordering = gen_frequency(&bytes);
     let heap = huffman(&ordering);
 
     // Create an empty file, do not do any additional work.
     // This allows future encoding to rely on no "nones" being present.
     if heap.is_none() {
-        File::create(output_filename).unwrap();
-        return 0;
+        return vec![]
     }
 
     let heap = heap.unwrap();
     let encoding = heap.gen_encoding();
     let seq = BitSequence::translate(&bytes, &encoding);
     let bytes = Wzfile::new(ordering, seq).to_stream();
-
-    let mut output = File::create(output_filename).unwrap();
-    output.write_all(&bytes).unwrap();
-    0
+    bytes
 }
 
 
 // ****** FILE DECOMPRESSOR ****** //
 
 // Returns exit status of program
-fn decompress(bytes: &[u8], output_filename: &str) -> i32 {
-    0
+fn decompress(bytes: &[u8]) -> Vec<u8> {
+    vec![]
 }
 
 
