@@ -3,6 +3,7 @@ use std::process;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
+use getopt::Opt;
 use crate::encoding::bitsequence::BitSequence;
 use crate::file::bytestream::ByteStream;
 use crate::file::wzfile::Wzfile;
@@ -40,6 +41,17 @@ mod file {
 }
 
 fn main() {
+    // All arguments.
+    let mut input_file: Option<String> = None;
+    let mut output_file: Option<String> = None;
+    let mut zip = false;
+    let mut unzip = true;
+
+    if !parse_args(&mut input_file, &mut output_file, &mut zip, &mut unzip) {
+        println!("Terminating.");
+        process::exit(1)
+    };
+
     // For now, only checking that there is a second arg.
     // Not complaining if they pass too many.
     let filename: String = env::args().nth(1).unwrap_or_else(|| {
@@ -68,4 +80,47 @@ fn main() {
 
     let mut output = File::create("test.wz").unwrap();
     output.write_all(&bytes).unwrap();
+}
+
+// Parses args.
+// Grabs the input and output filenames, if applicable.
+// Grabs whether the input file is being zipped or unzipped.
+// Return whether the program should continue.
+fn parse_args(input_filename: &mut Option<String>,
+              output_filename: &mut Option<String>,
+              zip: &mut bool,
+              unzip: &mut bool) -> bool {
+
+    let args: Vec<String> = env::args().collect();
+    let mut ops = getopt::Parser::new(&args, "zxi:o:");
+    loop {
+        match ops.next().transpose().unwrap() {
+            None => break,
+            Some(opt) => match opt {
+                Opt('z', None)             => { *zip = true; }
+                Opt('x', None)             => { *unzip = true; }
+                Opt('i', Some(str)) => { *input_filename = Some(str.clone()); }
+                Opt('o', Some(str)) => { *output_filename = Some(str.clone()); }
+                Opt('u', None) => {
+                    usage();
+                    return false;
+                }
+                Opt(value, _) => {
+                    println!("Unrecognized arg: {}", value);
+                    usage();
+                    return false;
+                }
+            }
+        }
+    }
+    true
+}
+
+fn usage() {
+    println!("Usage: wz");
+    println!("-u (usage)");
+    println!("-i (input file)");
+    println!("-o (output file)");
+    println!("-z (compress input file, mutually exclusive with -x)");
+    println!("-x (extract input file, mutually exclusive with -z)")
 }
