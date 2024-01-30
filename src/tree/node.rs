@@ -54,12 +54,20 @@ fn internal(left: Box<Node>, right: Box<Node>) -> Node { Internal { left, right 
 
 // PUBLIC INSTANCE METHODS
 impl Node {
+    // TODO: look at abstracting away common visiting.
+
     // Public interface to generate the BitSequence for the encoding of each byte.
     pub fn gen_encoding(&self) -> HashMap<u8, BitSequence> {
         let mut encoding: HashMap<u8, BitSequence> = HashMap::new();
+        let mut visit_fn = | node: &Node, path: &BitSequence | {
+            if let Leaf { contents } = node {
+                encoding.insert(contents.byte(), path.clone());
+            }
+        };
+
         match self {
             Internal { .. } => {
-                self.visit_node(&mut encoding, BitSequence::new());
+                self.visit_node(BitSequence::new(), &mut visit_fn);
             }
             // Edge case: only one node and a path hasn't been formed yet!
             // In this case, encode as 0.
@@ -70,12 +78,18 @@ impl Node {
         encoding
     }
 
+    // Public interface to generate the BitSequence for the encoding of each byte.
+    pub fn gen_decoding(&self) -> HashMap<BitSequence, u8> {
+        let mut decoding: HashMap<BitSequence, u8> = HashMap::new();
+        decoding
+    }
+
     // Generate paths to all leaf nodes.
     // Note: this function takes ownership of the path BitSequence
     // Because each leaf node ought to have its own path
-    fn visit_node(&self, encoding: &mut HashMap<u8, BitSequence>,
-                  path: BitSequence) {
 
+    // TODO: Replace visitor with closure!
+    fn visit_node(&self, path: BitSequence, visit_fn: &mut impl FnMut(&Node, &BitSequence)) {
         match self {
             // If it is an internal node, descend left and right, making this with 0 and 1.
             Internal { left, right } => {
@@ -84,13 +98,11 @@ impl Node {
                 let mut right_path = path.clone();
                 right_path.append_bit(1);
 
-                left.visit_node(encoding, left_path);
-                right.visit_node(encoding, right_path);
+                left.visit_node(left_path, visit_fn);
+                right.visit_node(right_path, visit_fn);
             }
             // If we've hit a leaf node, add the encoding to the bad boy!
-            Leaf { contents } => {
-                encoding.insert(contents.byte(), path.clone());
-            }
+            Leaf { .. } => { visit_fn(&self, &path); }
         }
     }
 }
