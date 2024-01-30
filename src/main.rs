@@ -45,6 +45,7 @@ fn main() {
     let mut input_file = String::new();
     let mut output_file= String::new();
     let mut zip = false;
+    // Unzip isn't strictly necessary, but I'm keeping it around for potential future use.
     let mut unzip = false;
 
     if let Some(exit_code) =
