@@ -53,12 +53,21 @@ fn main() {
         exit(exit_code)
     };
 
+    // Now, prepare input and output data for compression.
+    let bytes: Vec<u8> = match fs::read(&input_file) {
+        Ok(val) => { val }
+        Err(_) => {
+            println!("File not found: {}", &input_file);
+            exit(1)
+        }
+    };
+
     // We've validated that zip or unzip must be true.
     // So no need to check unzip here -- if not zip, then go!
     if zip {
-        exit(compress(&input_file, &output_file))
+        exit(compress(&bytes, &output_file))
     } else {
-        exit(decompress(&input_file, &output_file))
+        exit(decompress(&bytes, &output_file))
     }
 
     // For now, only checking that there is a second arg.
@@ -68,15 +77,7 @@ fn main() {
 // ****** FILE COMPRESSOR ****** //
 
 // Returns exit status of program
-fn compress(input_filename: &str, output_filename: &str) -> i32 {
-    let bytes: Vec<u8> = match fs::read(&input_filename) {
-        Ok(val) => { val }
-        Err(_) => {
-            println!("File not found: {}", &input_filename);
-            return 1
-        }
-    };
-
+fn compress(bytes: &[u8], output_filename: &str) -> i32 {
     let ordering = gen_frequency(&bytes);
     let heap = huffman(&ordering);
 
@@ -101,7 +102,7 @@ fn compress(input_filename: &str, output_filename: &str) -> i32 {
 // ****** FILE DECOMPRESSOR ****** //
 
 // Returns exit status of program
-fn decompress(input_filename: &str, output_filename: &str) -> i32 {
+fn decompress(bytes: &[u8], output_filename: &str) -> i32 {
     0
 }
 
