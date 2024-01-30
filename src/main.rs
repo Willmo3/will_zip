@@ -101,7 +101,32 @@ fn compress(bytes: &[u8]) -> Vec<u8>{
 
 // Returns exit status of program
 fn decompress(bytes: &[u8]) -> Vec<u8> {
-    vec![]
+    let (ordering, seq) = Wzfile::from_stream(bytes).deconstruct();
+    let heap = huffman(&ordering);
+
+    if heap.is_none() {
+        return vec![]
+    }
+
+    let heap = heap.unwrap();
+    // Need to gen decoding.
+    let decoding = heap.gen_decoding();
+    // Now, need to turn each bit in bitsequence into a regular byte in output file.
+
+    let mut bytes = vec![];
+    let mut current_seq = BitSequence::new();
+
+    for i in 0..seq.length() {
+        let current = seq.get_bit(i).unwrap();
+        current_seq.append_bit(current);
+        if let Some(byte) = decoding.get(&current_seq) {
+            bytes.push(*byte);
+            // Start searching from the next bit again.
+            current_seq = BitSequence::new();
+        }
+    }
+
+    bytes
 }
 
 

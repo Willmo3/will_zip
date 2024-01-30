@@ -7,7 +7,7 @@ use crate::file::bytestream::{ByteStream, LONG_LEN, slice_to_long};
 // Big credit to Dr. Nathan Sprague for making a java version of this.
 type Bit = u8;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub(crate) struct BitSequence {
     // NOTE: in most cases, u64 will be equal to usize, so indexing with u64 will work.
     // The only time this wouldn't work is:

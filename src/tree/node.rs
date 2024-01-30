@@ -59,6 +59,7 @@ impl Node {
     // Public interface to generate the BitSequence for the encoding of each byte.
     pub fn gen_encoding(&self) -> HashMap<u8, BitSequence> {
         let mut encoding: HashMap<u8, BitSequence> = HashMap::new();
+        // When a leaf is encountered, mark the value to the path traversed.
         let mut visit_fn = | node: &Node, path: &BitSequence | {
             if let Leaf { contents } = node {
                 encoding.insert(contents.byte(), path.clone());
@@ -66,9 +67,7 @@ impl Node {
         };
 
         match self {
-            Internal { .. } => {
-                self.visit_node(BitSequence::new(), &mut visit_fn);
-            }
+            Internal { .. } => { self.visit_node(BitSequence::new(), &mut visit_fn) }
             // Edge case: only one node and a path hasn't been formed yet!
             // In this case, encode as 0.
             Leaf { contents } => {
@@ -78,17 +77,27 @@ impl Node {
         encoding
     }
 
-    // Public interface to generate the BitSequence for the encoding of each byte.
+    // Public interface to generate the BitSequence for the decoding of each byte.
     pub fn gen_decoding(&self) -> HashMap<BitSequence, u8> {
         let mut decoding: HashMap<BitSequence, u8> = HashMap::new();
+        // When a leaf node is encountered, mark the path traversed to its value.
+        let mut visit_fn = | node: &Node, path: &BitSequence | {
+            if let Leaf { contents } = node {
+                decoding.insert(path.clone(), contents.byte());
+            }
+        };
+
+        match self {
+            Internal { .. } => { self.visit_node(BitSequence::new(), &mut visit_fn) }
+            Leaf { contents } => {
+                decoding.insert(BitSequence::from_bits(&[0]), contents.byte());
+            }
+        }
         decoding
     }
 
     // Generate paths to all leaf nodes.
-    // Note: this function takes ownership of the path BitSequence
-    // Because each leaf node ought to have its own path
-
-    // TODO: Replace visitor with closure!
+    // The visit fns may then do what they will with these paths.
     fn visit_node(&self, path: BitSequence, visit_fn: &mut impl FnMut(&Node, &BitSequence)) {
         match self {
             // If it is an internal node, descend left and right, making this with 0 and 1.
