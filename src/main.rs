@@ -4,7 +4,7 @@ use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::process::{exit, Output};
-use getopt::{Error, Opt};
+use getopts::Options;
 use crate::encoding::bitsequence::BitSequence;
 use crate::file::bytestream::ByteStream;
 use crate::file::wzfile::Wzfile;
@@ -42,27 +42,17 @@ mod file {
 }
 
 fn main() {
-    let mut input_file: Option<String> = None;
-    let mut output_file: Option<String> = None;
+    let mut input_file = String::new();
+    let mut output_file= String::new();
     let mut zip = false;
     let mut unzip = false;
 
     if let Some(exit_code) =
         parse_args(&mut input_file, &mut output_file, &mut zip, &mut unzip) {
-
         println!("Terminating.");
         exit(exit_code)
     };
 
-    if let Some(exit_code) =
-        validate_args(&input_file, &output_file, &zip, &unzip) {
-
-        println!("Terminating.");
-        exit(exit_code)
-    };
-
-    let input_file: String = input_file.unwrap();
-    let output_file: String = output_file.unwrap();
     // We've validated that zip or unzip must be true.
     // So no need to check unzip here -- if not zip, then go!
     if zip {
@@ -121,64 +111,71 @@ fn decompress(input_filename: &str, output_filename: &str) -> i32 {
 // Parses args.
 // Grabs the input and output filenames, if applicable.
 // Grabs whether the input file is being zipped or unzipped.
+// Validates that the combination is correct.
 // Return either the exit code the program should give, or none.
-fn parse_args(input_filename: &mut Option<String>,
-              output_filename: &mut Option<String>,
+fn parse_args(input_filename: &mut String,
+              output_filename: &mut String,
               zip: &mut bool,
               unzip: &mut bool) -> Option<i32> {
 
     let args: Vec<String> = env::args().collect();
-    let mut ops = getopt::Parser::new(&args, "uzxi:o:");
-    loop {
-        match ops.next().transpose() {
-            Ok(result) => match result {
-                None => break,
-                Some(opt) => match opt {
-                    Opt('z', None)             => { *zip = true; }
-                    Opt('x', None)             => { *unzip = true; }
-                    Opt('i', Some(str)) => { *input_filename = Some(str.clone()); }
-                    Opt('o', Some(str)) => { *output_filename = Some(str.clone()); }
-                    Opt('u', None) => {
-                        usage();
-                        return Some(0);
-                    }
-                    _ => {
-                        usage();
-                        return Some(1);
-                    }
-                }
-            }
-            Err(_) => {
-                usage();
-                return Some(1);
-            }
-        }
+    // length one if no user args specified.
+    if args.len() == 1 {
+        usage();
+        return Some(0)
     }
-    None
-}
 
-// Check whether the provided combination of arguments is valid.
-// If so, return none, indicating no exit code.
-// If the args are invalid, return the program's exit code.
-fn validate_args(input_filename: &Option<String>,
-                 output_filename: &Option<String>,
-                 zip: &bool,
-                 unzip: &bool) -> Option<i32> {
-    if input_filename.is_none() {
-        println!("Input file not specified!");
+    // Credit to getopts documentation for this.
+    // https://docs.rs/getopts/latest/getopts/
+    let mut opts = Options::new();
+    opts.optopt("o", "output", "output file name", "out.wz");
+    opts.optopt("i", "input", "input file name", "in.txt");
+    opts.optflag("u", "usage", "print this usage menu");
+    opts.optflag("z", "zip", "compress input file");
+    opts.optflag("x", "extract", "extract input file");
+
+    let matches = match opts.parse(&args[1..]) {
+        Ok( m) => { m }
+        Err( f) => {
+            println!("{}", f);
+            usage();
+            return Some(1)
+        }
+    };
+
+    if matches.opt_present("u") {
         usage();
-        return Some(1)
+        return Some(0)
     }
-    if output_filename.is_none() {
-        println!("Output file not specified!");
-        usage();
-        return Some(1)
+
+    if matches.opt_present("x") {
+        *unzip = true
     }
-    if zip == unzip {
+    if matches.opt_present("z") {
+        *zip = true
+    }
+    if *zip == *unzip {
         println!("Must either zip or unzip a file!");
         usage();
         return Some(1)
     }
+
+    *input_filename = match matches.opt_str("i") {
+        None => {
+            println!("No input file specified!");
+            return Some(1);
+        }
+        Some(val) => { val }
+    };
+    *output_filename = match matches.opt_str("o") {
+        None => {
+            println!("No output file specified!");
+            return Some(1);
+        }
+        Some(val) => { val }
+    };
+    
+    // If we get all the way here, no exit code. Keep the program going!
     None
 }
 
