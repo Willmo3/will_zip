@@ -91,7 +91,7 @@ fn compress(bytes: &[u8]) -> Vec<u8>{
     let heap = heap.unwrap();
     let encoding = heap.gen_encoding();
     let seq = BitSequence::translate(bytes, &encoding);
-    
+
     Wzfile::new(ordering, seq).to_stream()
 }
 

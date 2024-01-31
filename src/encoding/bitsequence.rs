@@ -123,10 +123,7 @@ impl BitSequence {
 impl Debug for BitSequence {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         for bit in self.get_bits() {
-            let result = f.write_fmt(format_args!("{}", bit));
-            if result.is_err() {
-                return result
-            }
+            f.write_fmt(format_args!("{}", bit))?;
         }
         Ok(())
     }
