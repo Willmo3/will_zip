@@ -79,7 +79,7 @@ fn main() {
 
 // Returns exit status of program
 fn compress(bytes: &[u8]) -> Vec<u8>{
-    let ordering = gen_frequency(&bytes);
+    let ordering = gen_frequency(bytes);
     let heap = huffman(&ordering);
 
     // Create an empty file, do not do any additional work.
@@ -90,7 +90,7 @@ fn compress(bytes: &[u8]) -> Vec<u8>{
 
     let heap = heap.unwrap();
     let encoding = heap.gen_encoding();
-    let seq = BitSequence::translate(&bytes, &encoding);
+    let seq = BitSequence::translate(bytes, &encoding);
     let bytes = Wzfile::new(ordering, seq).to_stream();
     bytes
 }
