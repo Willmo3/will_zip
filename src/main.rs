@@ -16,13 +16,13 @@ use crate::tree::node::{huffman, Node};
 // Author: Will Morris
 
 mod tree {
-    pub mod node;
+    pub(crate) mod node;
 }
 
 // The core of the program revolves around ordering bytes by their precedence.
 mod ordering {
     // Generates an ordering of bytes-frequency of appearance.
-    pub mod freq;
+    pub(crate) mod freq;
     pub(crate) mod bytefreq;
     pub(crate) mod freqmap;
 }
@@ -30,15 +30,15 @@ mod ordering {
 // Encodings are used when serializing the file to save space.
 mod encoding {
     // Represents a list of bits, compressed using bitwise ops into a vec<u8>
-    pub mod bitsequence;
+    pub(crate) mod bitsequence;
 }
 
 // Relevant to the actual act of saving the file.
 mod file {
     // Anything which can be represented as a stream of bytes uses this trait.
     // This allows for easier deserialization... given a byte array, an object will come out!
-    pub mod bytestream;
-    pub mod wzfile;
+    pub(crate) mod bytestream;
+    pub(crate) mod wzfile;
 }
 
 fn main() {
