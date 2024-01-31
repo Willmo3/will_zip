@@ -118,6 +118,8 @@ impl Node {
 // NODE ATTR ACCESSORS
 // useful for comparison
 impl Node {
+    // These simple visitors are easier to write without using the visitor closure.
+    // So I'm just keeping them like this.
     fn freq(&self) -> u64 {
         match self {
             Internal {  left, right, .. } => {
@@ -147,16 +149,14 @@ impl Node {
 
 impl Display for Node {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Internal { left, right } => {
-                left.fmt(f)?;
-                right.fmt(f)?;
-                Ok(())
+        let mut visit_fn = | node: &Node, _path: &BitSequence | {
+            if let Leaf { contents } = node {
+                f.write_fmt(format_args!
+                    ("{}: {} ", contents.byte(), contents.freq())).unwrap();
             }
-            Leaf { contents } => {
-                f.write_fmt(format_args!("{}: {} ", contents.byte(), contents.freq()))
-            }
-        }
+        };
+        self.visit_node(BitSequence::new(), &mut visit_fn);
+        Ok(())
     }
 }
 
