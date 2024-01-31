@@ -109,7 +109,7 @@ impl Node {
                 right.visit_node(right_path, visit_fn);
             }
             // If we've hit a leaf node, add the encoding to the bad boy!
-            Leaf { .. } => { visit_fn(&self, &path); }
+            Leaf { .. } => { visit_fn(self, &path); }
         }
     }
 }
