@@ -122,7 +122,6 @@ impl Node {
 // useful for comparison
 impl Node {
     // These simple visitors are easier to write without using the visitor closure.
-    // So I'm just keeping them like this.
     fn freq(&self) -> u64 {
         match self {
             Internal {  left, right, .. } => {
