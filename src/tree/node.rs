@@ -96,6 +96,9 @@ impl Node {
 
     // Generate paths to all leaf nodes.
     // The visit fns may then do what they will with these paths.
+    // This is particularly useful when:
+    // 1. You want to traverse with some sort of shared state (i.e. a decoding map)
+    // 2. The paths you took to get to nodes are important.
     fn visit_node(&self, path: BitSequence, visit_fn: &mut impl FnMut(&Node, &BitSequence)) {
         match self {
             // If it is an internal node, descend left and right, making this with 0 and 1.
@@ -152,9 +155,10 @@ impl Display for Node {
         let mut visit_fn = | node: &Node, _path: &BitSequence | {
             if let Leaf { contents } = node {
                 f.write_fmt(format_args!
-                    ("{}: {} ", contents.byte(), contents.freq())).unwrap();
+                    ("{}: {}", contents.byte(), contents.freq())).unwrap();
             }
         };
+
         self.visit_node(BitSequence::new(), &mut visit_fn);
         Ok(())
     }
