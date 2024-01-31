@@ -54,8 +54,6 @@ fn internal(left: Box<Node>, right: Box<Node>) -> Node { Internal { left, right 
 
 // PUBLIC INSTANCE METHODS
 impl Node {
-    // TODO: look at abstracting away common visiting.
-
     // Public interface to generate the BitSequence for the encoding of each byte.
     pub fn gen_encoding(&self) -> HashMap<u8, BitSequence> {
         let mut encoding: HashMap<u8, BitSequence> = HashMap::new();
@@ -151,14 +149,8 @@ impl Display for Node {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Internal { left, right } => {
-                let left = left.fmt(f);
-                if left.is_err() {
-                    return left
-                }
-                let right = right.fmt(f);
-                if right.is_err() {
-                    return right
-                }
+                left.fmt(f)?;
+                right.fmt(f)?;
                 Ok(())
             }
             Leaf { contents } => {
