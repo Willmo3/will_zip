@@ -1,15 +1,14 @@
 use std::env;
-use std::process;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
-use std::process::{exit, Output};
+use std::process::exit;
 use getopts::Options;
 use crate::encoding::bitsequence::BitSequence;
 use crate::file::bytestream::ByteStream;
 use crate::file::wzfile::Wzfile;
 use crate::ordering::freq::gen_frequency;
-use crate::tree::node::{huffman, Node};
+use crate::tree::node::huffman;
 
 // Given a file F, this program converts F into a HuffmanEncoding and saves a copy of it
 // Or given an already-encoded file F', this program converts it into a decoded file F.
