@@ -209,7 +209,7 @@ mod serialize_tests {
     #[test]
     fn test_real_bitseq() {
         let mut seq = BitSequence::new();
-        for i in 0..10 {
+        for _ in 0..10 {
             seq.append_bit(0);
         }
         seq.append_bit(1);
