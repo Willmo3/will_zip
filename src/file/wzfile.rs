@@ -23,7 +23,7 @@ pub struct Wzfile {
 impl Wzfile {
     // Given a map and seq, Wzfile prepares compression.
     pub fn new(map: HashMap<u8, u64>, seq: BitSequence) -> Self {
-        Wzfile { map: Freqmap::new(map), seq }
+        Wzfile { map: Freqmap::new(map, 8), seq }
     }
 
     // Once a wzfile has been deserialized, deconstruct it for access to its fields.

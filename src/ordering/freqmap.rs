@@ -8,12 +8,14 @@ use crate::file::bytestream::{ByteStream, LONG_LEN, slice_to_long};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Freqmap {
+    // although data contained in u64, must maintain minimum size for serialization.
+    data_size: u8,
     data: HashMap<u8, u64>
 }
 
 impl Freqmap {
-    pub fn new(map: HashMap<u8, u64>) -> Self {
-        Freqmap { data: map }
+    pub fn new(map: HashMap<u8, u64>, data_size: u8) -> Self {
+        Freqmap { data_size, data: map }
     }
 
     // FreqMap is really just a wrapper for serialization.
@@ -31,15 +33,19 @@ impl ByteStream for Freqmap {
     // Convert that stream into a hashmap of those pairs.
     fn from_stream(bytes: &[u8]) -> Self::Data {
         let mut map: HashMap<u8, u64> = HashMap::new();
+        let size = bytes[0];
+
         // premature exit: too small!
-        if bytes.len() <= LONG_LEN + 1 {
-            return Freqmap::new(map);
+        // Extra byte for the first entry.
+        if bytes.len() <= (size as usize) + 1 {
+            return Freqmap::new(map, size);
         }
 
-        let bound= bytes.len() - 1 - LONG_LEN;
-        let mut i = 0;
+        let bound= bytes.len() - (size as usize);
+        // Start adding key-value pairs after the size field.
+        let mut i = 1;
 
-        while i <= bound {
+        while i < bound {
             let byte = bytes[i];
             i += 1;
             let val = slice_to_long(&bytes[i..i+LONG_LEN]);
@@ -47,12 +53,13 @@ impl ByteStream for Freqmap {
             map.insert(byte, val);
         }
 
-        Freqmap::new(map)
+        Freqmap::new(map, size)
     }
 
     // Convert one of these bad boys into a byte stream.
     fn to_stream(self) -> Vec<u8> {
         let mut retval = Vec::new();
+        retval.push(self.data_size);
         let data = self.take();
         for (byte, value) in data {
             retval.push(byte);
@@ -70,7 +77,7 @@ mod tests {
 
     #[test]
     fn test_empty_to() {
-        let bytes = vec![];
+        let bytes = vec![8];
         let to = Freqmap::from_stream(&bytes);
         let from = to.to_stream();
         assert_eq!(bytes, from);
@@ -83,7 +90,7 @@ mod tests {
         map.insert(4, 14);
         map.insert(1, 22);
 
-        let from = Freqmap::new(map.clone()).to_stream();
+        let from = Freqmap::new(map.clone(), 8).to_stream();
         let to = Freqmap::from_stream(&from);
 
         let to_map = to.take();
