@@ -75,12 +75,40 @@ impl ByteStream for Wzfile {
     }
 }
 
+// Find the minimum number of bytes needed to represent all bytes
+// Useful for serialization -- we don't want to end up encoding extra zeros in the hashmaps!
+pub fn trim(values: &[u64]) -> u8 {
+    values.iter().fold(1, | min_size: u8, datum | {
+        let data_bytes = datum.to_be_bytes();
+
+        // How many leading zeros do we have?
+        // These could just as easily be ignored.
+        let mut leading_zeros = 0;
+        for byte in data_bytes {
+            if byte != 0 {
+                break
+            }
+            leading_zeros += 1
+        }
+
+        let size = (LONG_LEN as u8) - leading_zeros;
+
+        // If it took more space to allocate this element than we currently allocated
+        // Then our minimum size needs to be larger!
+        if size > min_size {
+            size
+        } else {
+            min_size
+        }
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;
     use crate::encoding::bitsequence::BitSequence;
     use crate::file::bytestream::ByteStream;
-    use crate::file::wzfile::Wzfile;
+    use crate::file::wzfile::{trim, Wzfile};
 
     #[test]
     fn test_no_len() {
@@ -112,5 +140,11 @@ mod tests {
         let from = Wzfile::from_stream(&to);
 
         assert_eq!(expected, from);
+    }
+
+    #[test]
+    fn test_trim() {
+        let values = vec![512, 32, 4, 8, 0, 22, 43];
+        assert_eq!(2, trim(&values))
     }
 }
