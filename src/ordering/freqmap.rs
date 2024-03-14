@@ -4,7 +4,7 @@
 // Author: Will Morris
 
 use std::collections::HashMap;
-use crate::file::bytestream::{ByteStream, LONG_LEN, min_byte_size, slice_to_long};
+use crate::file::bytestream::{ByteStream, LONG_LEN, long_to_bytes, min_byte_size, slice_to_long};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Freqmap {
@@ -66,7 +66,7 @@ impl ByteStream for Freqmap {
         for (byte, value) in data {
             retval.push(byte);
             // TODO: bound this by size
-            retval.append(&mut Vec::from(value.to_le_bytes()));
+            retval.append(&mut long_to_bytes(value, size));
         }
         retval
     }
