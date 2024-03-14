@@ -11,7 +11,7 @@
 
 use std::collections::HashMap;
 use crate::encoding::bitsequence::BitSequence;
-use crate::file::bytestream::{ByteStream, LONG_LEN, long_to_bytes, min_byte_size, slice_to_long};
+use crate::file::bytestream::{ByteStream, long_to_bytes, min_byte_size, slice_to_long};
 use crate::ordering::freqmap::{Freqmap, MAP_SIZE_FIELD_LEN, MAX_MAP_SIZE};
 
 #[derive(Debug, Clone, PartialEq)]
