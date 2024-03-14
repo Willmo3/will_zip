@@ -27,7 +27,7 @@ impl Wzfile {
     }
 
     // Once a wzfile has been deserialized, deconstruct it for access to its fields.
-    pub fn deconstruct(self) -> (HashMap::<u8, u64>, BitSequence) {
+    pub fn deconstruct(self) -> (HashMap<u8, u64>, BitSequence) {
         let map = self.map.take();
         let seq = self.seq;
         (map, seq)

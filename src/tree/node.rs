@@ -211,7 +211,7 @@ mod tests {
     }
 
     // Test that the tree properly generates an encoding
-    // NOTE: minor changes in tiebreaking should not ruin this test!
+    // NOTE: minor changes in tie breaking should not ruin this test!
     // Therefore, checking not exact encodings, but rather, encoding lengths.
     #[test]
     fn test_encoding() {

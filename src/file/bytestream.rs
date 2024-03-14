@@ -19,7 +19,7 @@ pub trait ByteStream {
 
 pub(crate) const LONG_LEN: usize = size_of::<u64>();
 
-// Given a slice of bytes, convert them into a u64.
+// Given a slice of bytes, convert them into u64.
 pub(crate) fn slice_to_long(bytes: &[u8]) -> u64 {
     let mut buf = [0u8; LONG_LEN];
     buf[..bytes.len()].copy_from_slice(bytes);
