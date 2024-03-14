@@ -4,7 +4,7 @@
 // Author: Will Morris
 
 use std::collections::HashMap;
-use crate::file::bytestream::{ByteStream, LONG_LEN, long_to_bytes, min_byte_size, slice_to_long};
+use crate::file::bytestream::{ByteStream, long_to_bytes, min_byte_size, slice_to_long};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Freqmap {
@@ -39,7 +39,7 @@ impl ByteStream for Freqmap {
             return Freqmap::new(map);
         }
 
-        let bound= bytes.len() - (size as usize);
+        let bound= bytes.len() - size;
         // Start adding key-value pairs after the size field.
         let mut i = 1;
 

@@ -22,9 +22,7 @@ pub(crate) const LONG_LEN: usize = size_of::<u64>();
 // Given a slice of bytes, convert them into a u64.
 pub(crate) fn slice_to_long(bytes: &[u8]) -> u64 {
     let mut buf = [0u8; LONG_LEN];
-    for i in 0..bytes.len() {
-        buf[i] = bytes[i]
-    }
+    buf[..bytes.len()].copy_from_slice(bytes);
     u64::from_le_bytes(buf)
 }
 
@@ -39,9 +37,8 @@ pub(crate) fn long_to_bytes(value: u64, size: u8) -> Vec<u8> {
 
     let mut retval = vec![0u8; size];
     let data_bytes = value.to_le_bytes();
-    for i in 0..size {
-        retval[i] = data_bytes[i];
-    }
+    retval[..size].copy_from_slice(&data_bytes[..size]);
+
     retval
 }
 
@@ -65,7 +62,7 @@ pub(crate) fn min_byte_size(value: u64) -> u8 {
         leading_zeros = 7
     }
 
-    return (LONG_LEN - leading_zeros) as u8
+    (LONG_LEN - leading_zeros) as u8
 }
 
 #[cfg(test)]
