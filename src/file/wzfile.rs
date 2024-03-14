@@ -11,7 +11,7 @@
 
 use std::collections::HashMap;
 use crate::encoding::bitsequence::BitSequence;
-use crate::file::bytestream::{ByteStream, LONG_LEN, long_to_bytes, slice_to_long};
+use crate::file::bytestream::{ByteStream, LONG_LEN, long_to_bytes, min_byte_size, slice_to_long};
 use crate::ordering::freqmap::{Freqmap, MAP_SIZE_FIELD_LEN, MAX_MAP_SIZE};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -52,13 +52,18 @@ impl ByteStream for Wzfile {
 
         // However, there can be arbitrarily many characters in a file, so this length will
         // be encoded as a long.
-        let bit_len = slice_to_long(&bytes[i..i + LONG_LEN]) as usize;
-        i += LONG_LEN;
-        let bits = BitSequence::from_stream(&bytes[i.. i + bit_len]);
-        i += bit_len;
+
+        // In order to reduce the size of the bit len field, having a field for its length.
+        let seq_len_len = bytes[i] as usize;
+        i += 1;
+
+        let seq_len = slice_to_long(&bytes[i..i + seq_len_len]) as usize;
+        i += seq_len_len;
+        let seq = BitSequence::from_stream(&bytes[i.. i + seq_len]);
+        i += seq_len;
 
         assert_eq!(i, bytes.len());
-        Wzfile::new(map.take(), bits)
+        Wzfile::new(map.take(), seq)
     }
 
     fn to_stream(self) -> Vec<u8> {
@@ -71,7 +76,14 @@ impl ByteStream for Wzfile {
 
         // Add length of sequence
         let mut seq_bytes = self.seq.to_stream();
-        retval.append(&mut Vec::from(seq_bytes.len().to_le_bytes()));
+
+        let size = seq_bytes.len() as u64;
+        // Need to know the width of the seq size field for deserialization!
+        let size_width = min_byte_size(size);
+        retval.push(size_width);
+        // Now, append that many bytes representing the size of the seq.
+        retval.append(&mut long_to_bytes(size, size_width));
+        // And finally, append the actual sequence
         retval.append(&mut seq_bytes);
 
         retval
