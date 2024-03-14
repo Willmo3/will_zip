@@ -31,14 +31,19 @@ pub(crate) fn slice_to_long(bytes: &[u8]) -> u64 {
     u64::from_le_bytes(buf)
 }
 
-// Given a long, convert it to a byte array of minimum size.
-pub(crate) fn long_to_slice(value: u64) -> Vec<u8> {
-    let size = min_byte_size(value);
-    let mut retval = vec![];
+// Given a long, convert it to a byte array of size size.
+// NOTE: size must be >= minimum bytes to represent this data!
+// Also, size must be at least one. Not representing 0 with zero bytes!
+pub(crate) fn long_to_slice(value: u64, size: u8) -> Vec<u8> {
+    let min_size = min_byte_size(value);
+    assert!(size > 0 && size >= min_size);
+    // Requiring size be sent as u8 to establish upper bound on max size.
+    let size = size as usize;
 
+    let mut retval = vec![0u8; size as usize];
     let data_bytes = value.to_le_bytes();
     for i in 0..size {
-        retval.push(data_bytes[i as usize]);
+        retval[i] = data_bytes[i];
     }
     retval
 }
@@ -79,8 +84,8 @@ mod tests {
 
     #[test]
     fn test_long_to_slice() {
-        assert_eq!(vec![1, 1], long_to_slice(257));
-        assert_eq!(vec![0], long_to_slice(0));
+        assert_eq!(vec![1, 1], long_to_slice(257, 2));
+        assert_eq!(vec![0], long_to_slice(0, 1));
     }
 
     #[test]
