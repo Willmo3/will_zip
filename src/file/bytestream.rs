@@ -31,6 +31,18 @@ pub(crate) fn slice_to_long(bytes: &[u8]) -> u64 {
     u64::from_le_bytes(buf)
 }
 
+// Given a long, convert it to a byte array of minimum size.
+pub(crate) fn long_to_slice(value: u64) -> Vec<u8> {
+    let size = min_byte_size(value);
+    let mut retval = vec![];
+
+    let data_bytes = value.to_le_bytes();
+    for i in 0..size {
+        retval.push(data_bytes[i as usize]);
+    }
+    retval
+}
+
 // Get the minimum number of bytes needed to represent a 64-bit value.
 pub(crate) fn min_byte_size(value: u64) -> u8 {
     let data_bytes = value.to_be_bytes();
@@ -56,13 +68,19 @@ pub(crate) fn min_byte_size(value: u64) -> u8 {
 
 #[cfg(test)]
 mod tests {
-    use crate::file::bytestream::{min_byte_size, slice_to_long};
+    use crate::file::bytestream::{long_to_slice, min_byte_size, slice_to_long};
 
     #[test]
     fn test_slice_to_long() {
         let data = vec![1, 1];
         let value = slice_to_long(&data);
         assert_eq!(257, value)
+    }
+
+    #[test]
+    fn test_long_to_slice() {
+        assert_eq!(vec![1, 1], long_to_slice(257));
+        assert_eq!(vec![0], long_to_slice(0));
     }
 
     #[test]
