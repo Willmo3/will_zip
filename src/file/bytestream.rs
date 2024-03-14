@@ -19,9 +19,6 @@ pub trait ByteStream {
 
 pub(crate) const LONG_LEN: usize = size_of::<u64>();
 
-// TODO: add a long to slice?
-// Need to have wrappers for the variable length fields.
-
 // Given a slice of bytes, convert them into a u64.
 pub(crate) fn slice_to_long(bytes: &[u8]) -> u64 {
     let mut buf = [0u8; LONG_LEN];
