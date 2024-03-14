@@ -170,8 +170,11 @@ Enter `visit_node`!
 
 Now, the encoding/decoding specific operations on the leaf node are contained within "visit_fn". This is far more extensible than copying and pasting a bunch of the same code!
 
+## Update: 3/14/2024
+
+Willzip now tracks additional metadata about the size of its fields, reducing them to their minimum necessary size during encoding!
+
 ## Future Steps
 
  - Make BitSequence use  an interator
  - Allow piping from stdin/out
- - Resize serialized frequency tree to minimum required size
