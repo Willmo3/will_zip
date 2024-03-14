@@ -4,7 +4,7 @@
 // Author: Will Morris
 
 use std::collections::HashMap;
-use crate::file::bytestream::{ByteStream, LONG_LEN, slice_to_long};
+use crate::file::bytestream::{ByteStream, LONG_LEN, min_byte_size, slice_to_long};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Freqmap {
@@ -46,6 +46,7 @@ impl ByteStream for Freqmap {
         while i < bound {
             let byte = bytes[i];
             i += 1;
+            // TODO: bound this by size
             let val = slice_to_long(&bytes[i..i+LONG_LEN]);
             i+= LONG_LEN;
             map.insert(byte, val);
@@ -59,37 +60,23 @@ impl ByteStream for Freqmap {
         let mut retval = Vec::new();
         let data = self.take();
 
-        let size = trim(&data);
+        let size = trim_map(&data);
         retval.push(size);
 
         for (byte, value) in data {
             retval.push(byte);
+            // TODO: bound this by size
             retval.append(&mut Vec::from(value.to_le_bytes()));
         }
         retval
     }
 }
 
-// Find the minimum number of bytes needed to represent all bytes
+// Find the minimum number of bytes needed to represent values in map
 // Useful for serialization -- we don't want to end up encoding extra zeros in the hashmaps!
-fn trim(map: &HashMap<u8, u64>) -> u8 {
+fn trim_map(map: &HashMap<u8, u64>) -> u8 {
     map.values().fold(1, |min_size: u8, datum | {
-        let data_bytes = datum.to_be_bytes();
-
-        // How many leading zeros do we have?
-        // These could just as easily be ignored.
-        let mut leading_zeros = 0;
-        for byte in data_bytes {
-            if byte != 0 {
-                break
-            }
-            leading_zeros += 1
-        }
-
-        let size = (LONG_LEN as u8) - leading_zeros;
-
-        // If it took more space to allocate this element than we currently allocated
-        // Then our minimum size needs to be larger!
+        let size = min_byte_size(*datum);
         if size > min_size {
             size
         } else {
@@ -102,7 +89,7 @@ fn trim(map: &HashMap<u8, u64>) -> u8 {
 mod tests {
     use std::collections::HashMap;
     use crate::file::bytestream::ByteStream;
-    use crate::ordering::freqmap::{Freqmap, trim};
+    use crate::ordering::freqmap::{Freqmap, trim_map};
 
     #[test]
     fn test_empty_to() {
@@ -129,13 +116,13 @@ mod tests {
 
 
     #[test]
-    fn test_trim() {
+    fn test_trim_map() {
         let mut map = HashMap::new();
         map.insert(1, 12);
         map.insert(2, 512);
-        assert_eq!(2, trim(&map));
+        assert_eq!(2, trim_map(&map));
 
         map.insert(3, 18446744073709551615);
-        assert_eq!(8, trim(&map));
+        assert_eq!(8, trim_map(&map));
     }
 }
