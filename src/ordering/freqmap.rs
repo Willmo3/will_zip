@@ -31,11 +31,11 @@ impl ByteStream for Freqmap {
     // Convert that stream into a hashmap of those pairs.
     fn from_stream(bytes: &[u8]) -> Self::Data {
         let mut map: HashMap<u8, u64> = HashMap::new();
-        let size = bytes[0];
+        let size = bytes[0] as usize;
 
         // premature exit: too small!
         // Extra byte for the first entry.
-        if bytes.len() <= (size as usize) + 1 {
+        if bytes.len() <= size + 1 {
             return Freqmap::new(map);
         }
 
@@ -46,9 +46,8 @@ impl ByteStream for Freqmap {
         while i < bound {
             let byte = bytes[i];
             i += 1;
-            // TODO: bound this by size
-            let val = slice_to_long(&bytes[i..i+LONG_LEN]);
-            i+= LONG_LEN;
+            let val = slice_to_long(&bytes[i..i+size]);
+            i+= size;
             map.insert(byte, val);
         }
 
@@ -65,7 +64,6 @@ impl ByteStream for Freqmap {
 
         for (byte, value) in data {
             retval.push(byte);
-            // TODO: bound this by size
             retval.append(&mut long_to_bytes(value, size));
         }
         retval
