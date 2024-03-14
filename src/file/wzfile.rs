@@ -145,6 +145,9 @@ mod tests {
     #[test]
     fn test_trim() {
         let values = vec![512, 32, 4, 8, 0, 22, 43];
-        assert_eq!(2, trim(&values))
+        assert_eq!(2, trim(&values));
+
+        let big_value = vec![18446744073709551615];
+        assert_eq!(8, trim(&big_value));
     }
 }
