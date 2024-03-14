@@ -4,7 +4,14 @@
 // Author: Will Morris
 
 use std::collections::HashMap;
-use crate::file::bytestream::{ByteStream, long_to_bytes, min_byte_size, slice_to_long};
+use crate::file::bytestream::{ByteStream, LONG_LEN, long_to_bytes, min_byte_size, slice_to_long};
+
+// What's the maximum number of bytes needed to represent the contents of a freqmap in memory?
+// 9 bytes per 256 entries, plus one byte for the per-entry size field.
+pub(crate) const MAX_MAP_SIZE: usize = (LONG_LEN + 1) * 256 + 1;
+// How many bytes will it take to represent the size field for our map?
+// In this case, MAX_MAP_SIZE can be represented as u16 (with lots of spare space!).
+pub(crate) const MAP_SIZE_FIELD_LEN: usize = 2;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Freqmap {

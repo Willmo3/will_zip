@@ -11,8 +11,8 @@
 
 use std::collections::HashMap;
 use crate::encoding::bitsequence::BitSequence;
-use crate::file::bytestream::{ByteStream, LONG_LEN, slice_to_long};
-use crate::ordering::freqmap::Freqmap;
+use crate::file::bytestream::{ByteStream, LONG_LEN, long_to_bytes, slice_to_long};
+use crate::ordering::freqmap::{Freqmap, MAP_SIZE_FIELD_LEN, MAX_MAP_SIZE};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Wzfile {
@@ -42,20 +42,23 @@ impl ByteStream for Wzfile {
     fn from_stream(bytes: &[u8]) -> Self::Data {
         let mut i = 0;
 
-        let map_len = slice_to_long(&bytes[..LONG_LEN]) as usize;
-        i += LONG_LEN;
+        // Since there are only 256 bytes, maps have a tight upper bound on their size.
+        let map_len = slice_to_long(&bytes[..MAP_SIZE_FIELD_LEN]) as usize;
+        assert!(map_len <= MAX_MAP_SIZE);
+
+        i += MAP_SIZE_FIELD_LEN;
         let map = Freqmap::from_stream(&bytes[i..i + map_len]);
         i += map_len;
 
+        // However, there can be arbitrarily many characters in a file, so this length will
+        // be encoded as a long.
         let bit_len = slice_to_long(&bytes[i..i + LONG_LEN]) as usize;
         i += LONG_LEN;
         let bits = BitSequence::from_stream(&bytes[i.. i + bit_len]);
         i += bit_len;
 
         assert_eq!(i, bytes.len());
-
         Wzfile::new(map.take(), bits)
-
     }
 
     fn to_stream(self) -> Vec<u8> {
@@ -63,7 +66,7 @@ impl ByteStream for Wzfile {
 
         let mut map_bytes = self.map.to_stream();
         // Add length of frequency mapping
-        retval.append(&mut Vec::from(map_bytes.len().to_le_bytes()));
+        retval.append(&mut long_to_bytes(map_bytes.len() as u64, MAP_SIZE_FIELD_LEN as u8));
         retval.append(&mut map_bytes);
 
         // Add length of sequence
