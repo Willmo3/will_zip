@@ -45,17 +45,30 @@ pub(crate) fn min_byte_size(value: u64) -> u8 {
         leading_zeros += 1
     }
 
+    // Special case: all zeroes.
+    // We need at least one byte to represent this!
+    if leading_zeros == 8 {
+        leading_zeros = 7
+    }
+
     return (LONG_LEN - leading_zeros) as u8
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::file::bytestream::slice_to_long;
+    use crate::file::bytestream::{min_byte_size, slice_to_long};
 
     #[test]
     fn test_slice_to_long() {
         let data = vec![1, 1];
         let value = slice_to_long(&data);
         assert_eq!(257, value)
+    }
+
+    #[test]
+    fn test_min_byte_size() {
+        assert_eq!(8, min_byte_size(18446744073709551615));
+        assert_eq!(1, min_byte_size(1));
+        assert_eq!(1, min_byte_size(0));
     }
 }
