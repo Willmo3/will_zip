@@ -172,7 +172,7 @@ Now, the encoding/decoding specific operations on the leaf node are contained wi
 
 ## Update: 3/2024
 
-It's Spring break!
+It's spring break!
 
 Willzip now tracks additional metadata about the size of its fields, reducing them to their minimum necessary size during encoding!
 
