@@ -1,7 +1,7 @@
 use std::env;
 use std::fs;
 use std::fs::File;
-use std::io::Write;
+use std::io::{Read, stdin, stdout, Write};
 use std::process::exit;
 use getopts::Options;
 use crate::encoding::bitsequence::BitSequence;
@@ -41,8 +41,9 @@ mod file {
 }
 
 fn main() {
-    let mut input_file = String::new();
-    let mut output_file= String::new();
+    // If not specified, use stdin/out
+    let mut input_file: Option<String> = None;
+    let mut output_file: Option<String> = None;
     let mut zip = false;
     // Unzip isn't strictly necessary, but I'm keeping it around for potential future use.
     let mut unzip = false;
@@ -54,13 +55,21 @@ fn main() {
     };
 
     // Now, prepare input and output data for compression.
-    let bytes: Vec<u8> = match fs::read(&input_file) {
-        Ok(val) => { val }
-        Err(_) => {
-            println!("File not found: {}", &input_file);
-            exit(1)
+    let bytes: Vec<u8>;
+
+    // Use stdin or the specified input file.
+    if let Some(filename) = input_file {
+        bytes = match fs::read(&filename) {
+            Ok(val) => { val }
+            Err(_) => {
+                println!("File not found: {}", &filename);
+                exit(1)
+            }
         }
-    };
+    } else {
+        // I have to unwrap all the potential errors... on each byte.
+        bytes = stdin().bytes().map(| item | item.unwrap()).collect();
+    }
 
     // We've validated that zip or unzip must be true.
     // So no need to check unzip here -- if not zip, then go!
@@ -69,8 +78,14 @@ fn main() {
         false => { decompress(&bytes) }
     };
 
-    let mut output_file = File::create(output_file).unwrap();
-    output_file.write_all(&to_write).unwrap();
+    // Use stdout or the specified output file.
+    if let Some(filename) = output_file {
+        let mut output_file = File::create(filename).unwrap();
+        output_file.write_all(&to_write).unwrap();
+    } else {
+        stdout().write_all(&to_write).unwrap();
+    }
+
     exit(0)
 }
 
@@ -136,8 +151,8 @@ fn decompress(bytes: &[u8]) -> Vec<u8> {
 // Grabs whether the input file is being zipped or unzipped.
 // Validates that the combination is correct.
 // Return either the exit code the program should give, or none.
-fn parse_args(input_filename: &mut String,
-              output_filename: &mut String,
+fn parse_args(input_filename: &mut Option<String>,
+              output_filename: &mut Option<String>,
               zip: &mut bool,
               unzip: &mut bool) -> Option<i32> {
 
@@ -153,6 +168,8 @@ fn parse_args(input_filename: &mut String,
     let mut opts = Options::new();
     opts.optopt("o", "output", "output file name", "out.wz");
     opts.optopt("i", "input", "input file name", "in.txt");
+    opts.optflag("r", "stdin", "read from stdin as input");
+    opts.optflag("p", "stdout", "print to stdout");
     opts.optflag("u", "usage", "print this usage menu");
     opts.optflag("z", "zip", "compress input file");
     opts.optflag("x", "extract", "extract input file");
@@ -183,20 +200,43 @@ fn parse_args(input_filename: &mut String,
         return Some(1)
     }
 
-    *input_filename = match matches.opt_str("i") {
-        None => {
-            println!("No input file specified!");
-            return Some(1);
+    let use_stdin = matches.opt_present("r");
+    let use_stdout = matches.opt_present("p");
+
+    // if standard in is defined, we expect no input file.
+    // But if it is, we expect an input file!
+    if use_stdin {
+        if let Some(_) = matches.opt_str("i") {
+            println!("Input file and stdin both specified!");
+            usage();
+            return Some(1)
         }
-        Some(val) => { val }
-    };
-    *output_filename = match matches.opt_str("o") {
-        None => {
-            println!("No output file specified!");
-            return Some(1);
+    } else {
+        *input_filename = match matches.opt_str("i") {
+            None => {
+                println!("No input file specified!");
+                return Some(1);
+            }
+            Some(val) => { Some(val) }
+        };
+    }
+
+    // The same is true with stdout.
+    if use_stdout {
+        if let Some(_) = matches.opt_str("o") {
+            println!("Output file and stdout both specified!");
+            usage();
+            return Some(1)
         }
-        Some(val) => { val }
-    };
+    } else {
+        *output_filename = match matches.opt_str("o") {
+            None => {
+                println!("No output file specified!");
+                return Some(1);
+            }
+            Some(val) => { Some(val) }
+        };
+    }
 
     // If we get all the way here, no exit code. Keep the program going!
     None
@@ -205,7 +245,9 @@ fn parse_args(input_filename: &mut String,
 fn usage() {
     println!("Usage: wz");
     println!("-u (usage)");
+    println!("-r (read from stdin, mutually exclusive with -i");
     println!("-i (input file)");
+    println!("-p (print to stdout, mutually exclusive with -so");
     println!("-o (output file)");
     println!("-z (compress input file, mutually exclusive with -x)");
     println!("-x (extract input file, mutually exclusive with -z)")
