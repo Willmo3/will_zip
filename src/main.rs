@@ -205,37 +205,41 @@ fn parse_args(input_filename: &mut Option<String>,
 
     // if standard in is defined, we expect no input file.
     // But if it is, we expect an input file!
-    if use_stdin {
-        if let Some(_) = matches.opt_str("i") {
-            println!("Input file and stdin both specified!");
-            usage();
-            return Some(1)
-        }
-    } else {
-        *input_filename = match matches.opt_str("i") {
-            None => {
-                println!("No input file specified!");
+    match matches.opt_str("i") {
+        None => {
+            if !use_stdin {
+                println!("No input specified!");
+                usage();
                 return Some(1);
             }
-            Some(val) => { Some(val) }
-        };
+        }
+        Some(filename) => {
+            if use_stdin {
+                println!("Both stdin and input filename specified!");
+                usage();
+                return Some(1);
+            }
+            *input_filename = Some(filename)
+        }
     }
 
     // The same is true with stdout.
-    if use_stdout {
-        if let Some(_) = matches.opt_str("o") {
-            println!("Output file and stdout both specified!");
-            usage();
-            return Some(1)
-        }
-    } else {
-        *output_filename = match matches.opt_str("o") {
-            None => {
-                println!("No output file specified!");
-                return Some(1);
+    match matches.opt_str("o") {
+        None => {
+            if !use_stdout {
+                println!("No output specified!");
+                usage();
+                return Some(1)
             }
-            Some(val) => { Some(val) }
-        };
+        }
+        Some(filename) => {
+            if use_stdout {
+                println!("Both stdout and output filename specified!");
+                usage();
+                return Some(1)
+            }
+            *output_filename = Some(filename)
+        }
     }
 
     // If we get all the way here, no exit code. Keep the program going!
